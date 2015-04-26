@@ -6,7 +6,7 @@
 
 var chalk = require('chalk');
 var User = require('../app/models/user.server.model.js');
-var Letters = require('../app/models/event.server.model.js');
+var Event = require('../app/models/event.server.model.js');
 
 console.log('here');
 User.count({
@@ -32,8 +32,8 @@ User.count({
             translation: '',
             provider: 'local',
             role: 'admin',
-            username: 'AAA',
-            password: 'wwadmin2015'
+            username: 'admin',
+            password: 'wwadmin15'
         }, {
             name: 'Elmer Meza',
             contingent: 'M',
@@ -52,20 +52,14 @@ User.count({
             volunteering: '',
             translation: '',
             provider: 'local',
-            username: 'WWT',
+            username: 'emeza@test.com',
             password: 'demo2015',
         }, function() {
-            Letters.find({}, function() {
-                Letters.create({
-                    track: 'WWTC001'
+            Event.find({}, function() {
+                Event.create({
+                    date: '05/02/15'
                 }, {
-                    track: 'WWTC002'
-                }, {
-                    track: 'WWTC003'
-                }, {
-                    track: 'WWTC004'
-                }, {
-                    track: 'WWTC005'
+                    date: '05/10/15'
                 });
                 console.log(chalk.green('Finished populating DB with seed data'));
             });

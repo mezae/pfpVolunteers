@@ -16,11 +16,10 @@
 			</tr>
 			<tr ng-show="newVolunteer">
 				<td>
-					<select class="profile form-control text-center" ng-model="newVol.name">
+					<select class="profile form-control text-center" ng-model="volProfile">
 						<option value="" class="text-center">name</option>
-						<option ng-repeat="user in users" value="{{user.name}}">{{user.name}}</option>
+						<option ng-repeat="user in users" value="{{$index}}">{{user.first_name}} {{user.last_name}}</option>
 					</select>
-					<!-- <input type="text" class="profile form-control text-center" ng-model="newVol.name" placeholder="name"> -->
 				</td>
 				<td>
 					<input type="number" class="profile form-control text-center" ng-model="newVol.hours" placeholder="hours">

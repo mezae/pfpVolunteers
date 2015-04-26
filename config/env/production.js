@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-    db: 'mongodb://nycares:volunteer87@ds031571.mongolab.com:31571/winterwishes',
+    db: process.env.MONGOLAB_URI,
     assets: {
         lib: {
             css: [
@@ -18,7 +18,6 @@ module.exports = {
                 'public/lib/angular-ui-router/release/angular-ui-router.min.js',
                 'public/lib/angular-ui-utils/ui-utils.min.js',
                 'public/lib/angular-bootstrap/ui-bootstrap-tpls.min.js',
-                'public/lib/d3/d3.min.js',
                 'public/lib/lodash/lodash.min.js',
                 'public/lib/angular-socket-io/socket.min.js'
             ]

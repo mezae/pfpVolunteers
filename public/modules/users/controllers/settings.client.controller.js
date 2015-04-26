@@ -15,13 +15,13 @@ angular.module('users').controller('SettingsController', ['$scope', '$http', '$l
         $scope.relatedEvents = Events.query({}, function() {
             $scope.relatedEvents = _.filter($scope.relatedEvents, function(event) {
                 return _.find(event.volunteers, {
-                    'name': $scope.currentUser.name
+                    'name': $scope.currentUser.first_name + ' ' + $scope.currentUser.last_name
                 });
             });
 
             $scope.relatedEvents = _.map($scope.relatedEvents, function(event) {
                 event.volunteers = _.find(event.volunteers, {
-                    'name': $scope.currentUser.name
+                    'name': $scope.currentUser.first_name + ' ' + $scope.currentUser.last_name
                 });
                 return event;
             });

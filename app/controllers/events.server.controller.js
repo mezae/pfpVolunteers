@@ -59,8 +59,6 @@ exports.update = function(req, res) {
  */
 exports.delete = function(req, res) {
     var event = req.event;
-    var user = event.track.substring(0, 4);
-    var index = Number(event.track.substring(4));
 
     event.remove(function(err) {
         if (err) {
@@ -68,30 +66,8 @@ exports.delete = function(req, res) {
                 message: errorHandler.getErrorMessage(err)
             });
         } else {
-            Event.find({
-                'track': {
-                    $regex: '^' + user
-                }
-            }).sort('track').exec(function(err, letters) {
-                if (err) {
-                    return res.status(400).send({
-                        message: errorHandler.getErrorMessage(err)
-                    });
-                } else {
-                    _.forEach(_.range(index - 1, letters.length), function(num) {
-                        letters[num].track = user + _.padLeft(num + 1, 3, '0');
-                        letters[num].save(function(err) {
-                            if (err) {
-                                return res.status(400).send({
-                                    message: errorHandler.getErrorMessage(err)
-                                });
-                            }
-                        });
-                    });
-                }
-            });
             return res.status(200).send({
-                message: 'remaining tracking labels updated'
+                message: 'done'
             });
         }
     });

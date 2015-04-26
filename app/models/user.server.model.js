@@ -25,7 +25,11 @@ var validateLocalStrategyPassword = function(password) {
  * User Schema
  */
 var UserSchema = new Schema({
-    name: {
+    first_name: {
+        type: String,
+        default: '',
+    },
+    last_name: {
         type: String,
         default: '',
     },
@@ -83,9 +87,9 @@ var UserSchema = new Schema({
         default: '',
         match: [/.+\@.+\..+/, 'Please fill a valid email address']
     },
-    volunteering: {
-        type: String,
-        default: '',
+    hours: {
+        type: Number,
+        default: 0,
     },
     translation: {
         type: String,
@@ -115,6 +119,10 @@ var UserSchema = new Schema({
     },
     updated: {
         type: Date
+    },
+    submitted: {
+        type: Boolean,
+        default: false
     },
     created: {
         type: Date,

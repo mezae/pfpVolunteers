@@ -12,10 +12,6 @@ angular.module('core').config(['$stateProvider', '$urlRouterProvider',
                 url: '/',
                 templateUrl: 'modules/core/views/home.html'
             })
-            .state('first', {
-                url: '/settings/profile',
-                templateUrl: 'modules/letters/views/firstLogin.html'
-            })
             .state('confirm', {
                 url: '/settings/profile/first',
                 templateUrl: 'modules/users/views/settings/edit-profile.client.view.html'

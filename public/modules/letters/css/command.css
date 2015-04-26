@@ -87,3 +87,25 @@ a.btn-ready, a.btn-review, a.btn-complete, a.btn-started, a.btn-empty {
 .agency-mid {
   padding: 4px 15px;
 }
+
+.btn-radio {
+  color: white;
+  border-color: #9C182F;
+  background-color: #9C182F;
+  opacity: 0.8;
+}
+
+.box-complete {
+  color: #9C182F;
+  border-color: #9C182F;
+}
+
+.box-empty {
+  color: #ccc;
+  border-color: #ccc;
+}
+
+.btn.active {
+  opacity: 1;
+  cursor: default;
+}

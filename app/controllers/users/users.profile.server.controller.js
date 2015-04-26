@@ -8,7 +8,7 @@ var _ = require('lodash'),
     mongoose = require('mongoose'),
     passport = require('passport'),
     User = mongoose.model('User'),
-    Article = mongoose.model('Event');
+    Event = mongoose.model('Event');
 
 //Allows admin access to all community partner accounts
 exports.list = function(req, res) {
@@ -42,47 +42,13 @@ exports.read = function(req, res) {
 //delete extra letters if number of accepted letters has decreased
 function deleteExtras(letters, newTotal) {
     var extras = _.pluck(letters.slice(newTotal), 'track');
-    Article.remove({
+    Event.remove({
         track: {
             $in: extras
         }
     }, function() {
         console.log('Deleted extra records');
     });
-}
-
-//creates new letters if number of accepted letters has increased
-function createNewAdditions(oldTotal, newTotal, label) {
-    _.forEach(_.range(oldTotal + 1, newTotal + 1), function(num) {
-        var letter = new Article();
-        letter.track = label + _.padLeft(num, 3, '0');
-        letter.save(function(err) {
-            if (err) {
-                console.log(err, 'Failed to create a letter. Stopping...');
-                return;
-            }
-        });
-    });
-    console.log('Created new records, avoided duplicates');
-}
-
-//Make changes to the letters collection that the user requested; 
-//delete extras if accepted number of letters decreased
-//make new letter records otherwise
-function updateRecords(code, types, recs) {
-    for (var type in types) {
-        var letters = _.filter(recs, function(reco) {
-            return _.includes(reco.track, code + type);
-        });
-        var numAccepted = types[type];
-        var numLetters = letters.length;
-
-        if (numAccepted < numLetters) {
-            deleteExtras(letters, numAccepted);
-        } else if (numAccepted > numLetters) {
-            createNewAdditions(numLetters, numAccepted, code + type);
-        }
-    }
 }
 
 //Allows admin to update a community partner account;
@@ -98,6 +64,7 @@ exports.update = function(req, res) {
     // Merge existing user
     user = _.assign(user, req.body);
     user.updated = Date.now();
+    user.submitted = true;
 
     user.save(function(err) {
         if (err) {
@@ -105,19 +72,7 @@ exports.update = function(req, res) {
                 message: errorHandler.getErrorMessage(err)
             });
         } else {
-            //Update letters collection if number accepted changed
-            Article.find({
-                'track': {
-                    $regex: '^' + user.username
-                }
-            }).sort('track').exec(function(err, letters) {
-                updateRecords(user.username, {
-                    'C': user.children,
-                    'T': user.teens,
-                    'S': user.seniors
-                }, letters);
-                res.json(user);
-            });
+            res.json(user);
         }
     });
 };
@@ -125,14 +80,14 @@ exports.update = function(req, res) {
 //Delete a community partner's account, including all associated letters
 exports.delete = function(req, res) {
     var user = req.user;
-    if (user.username !== 'AAA') {
+    if (user.role !== 'admin') {
         user.remove(function(err) {
             if (err) {
                 return res.status(400).send({
                     message: errorHandler.getErrorMessage(err)
                 });
             } else {
-                Article.remove({
+                Event.remove({
                     'track': {
                         $regex: '^' + user.username
                     }
@@ -157,8 +112,8 @@ exports.me = function(req, res) {
 exports.reset = function(req, res) {
     var user = req.user;
     User.remove({
-        'username': {
-            $ne: 'AAA'
+        'role': {
+            $ne: 'admin'
         }
     }, function(err) {
         if (err) {
@@ -166,7 +121,7 @@ exports.reset = function(req, res) {
                 message: errorHandler.getErrorMessage(err)
             });
         } else {
-            Article.remove({}, function() {
+            Event.remove({}, function() {
                 console.log('Deleted all letters');
             });
             res.json(user);

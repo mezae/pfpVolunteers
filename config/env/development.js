@@ -3,7 +3,7 @@
 module.exports = {
     db: 'mongodb://localhost/prep2-dev',
     app: {
-        title: 'Winter Wishes - Development Environment'
+        title: 'PFP Volunteers - Development Environment'
     },
     mailer: {
         from: 'The Winter Wishes Team <mezae10@gmail.com>',

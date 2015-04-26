@@ -1,13 +1,19 @@
 <section class="row" data-ng-controller="SettingsController">
 
+	
+
+	<div class="col-md-12">
+
+	<h3 class="text-center" ng-hide="user.role === 'admin'">Admissions Committee Contact Form</h3>
+	<h3 class="text-center" ng-show="user.role === 'admin' && radioModel === 'users'">Contact Information</h3>
+	<h3 class="text-center" ng-show="user.role === 'admin' && radioModel === 'events'">Volunteer Summary</h3>
+
 	<div class="btn-group pull-right">
-		<label class="btn btn-primary" ng-model="radioModel" btn-radio="'users'"><i class="glyphicon glyphicon-user"></i></label>
-		<label class="btn btn-primary" ng-model="radioModel" btn-radio="'events'"><i class="glyphicon glyphicon-calendar"></i></label>
+		<label class="btn btn-radio" ng-model="radioModel" btn-radio="'users'"><i class="glyphicon glyphicon-user"></i></label>
+		<label class="btn btn-radio" ng-model="radioModel" btn-radio="'events'"><i class="glyphicon glyphicon-calendar"></i></label>
 	</div>
 
-	<h3 class="col-md-12 text-center" ng-hide="user.role === 'admin'">Admissions Committee Contact Form</h3>
-	<h3 class="col-md-12 text-center" ng-show="user.role === 'admin' && radioModel === 'users'">Contact Information</h3>
-	<h3 class="col-md-12 text-center" ng-show="user.role === 'admin' && radioModel === 'events'">Volunteer Summary</h3>
+	</div>
 
 	<div class="col-xs-offset-2 col-xs-8 col-md-offset-4 col-md-4">
 
@@ -18,7 +24,16 @@
 
 					<label for="contact" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Name</label>
 					<div class="col-sm-9">
-						<input type="text" id="contact" name="contact" class="profile form-control" data-ng-model="currentUser.name" placeholder="full name" required>
+						<input type="text" id="contact" name="contact" class="profile form-control" data-ng-model="currentUser.first_name" placeholder="first name" required>
+					</div>
+
+				</div>
+
+				<div class="form-group">
+
+					<label for="contact" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Name</label>
+					<div class="col-sm-9">
+						<input type="text" id="contact" name="contact" class="profile form-control" data-ng-model="currentUser.last_name" placeholder="last name" required>
 					</div>
 
 				</div>
@@ -140,7 +155,7 @@
 				<th>Event Date</th>
 				<th># of Hours</th>
 			</tr>
-			<tr ng-repeat="event in relatedEvents">
+			<tr ng-repeat="event in relatedEvents | orderBy: 'date'">
 				<td>{{event.date}}</td>
 				<td>{{event.volunteers.hours}}</td>
 			</tr>

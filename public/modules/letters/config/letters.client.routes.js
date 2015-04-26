@@ -36,10 +36,6 @@ angular.module('letters').config(['$stateProvider',
         state('email-success', {
             url: '/admin/emails/success',
             templateUrl: 'modules/letters/views/esent.html'
-        }).
-        state('stats', {
-            url: '/admin/stats',
-            templateUrl: 'modules/letters/views/stats.html'
         });
     }
 ]);

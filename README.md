@@ -1,10 +1,6 @@
 
 
-The app was created to streamline New York Cares' Annual Winter Wishes program.
-
-## Live Example
-Browse the live Winter Wishes App at [http://winterwishes.herokuapp.com](http://winterwishes.herokuapp.com).
-For user view access use: WWT and demo2015
+The app was created to track volunteer hours at pfp
 
 ## Full-Stack Javascript
 The building blocks that assemble this Winter Wishes application: 

@@ -14,7 +14,7 @@
 	</div>
 
 	<div class="row">
-		<div class="col-md-3 pull-right col-sm-12 col-xs-12 nga-default nga-stagger nga-slide-right hidden-print" ng-show="needToUpdate">
+		<div class="col-md-3 pull-right col-sm-12 col-xs-12 hidden-print" ng-show="needToUpdate">
 			<form role="form" ng-show="!partner">
 				<div class="form-group">
 					<label class="sr-only" for="the_file">File input</label>
@@ -55,7 +55,7 @@
 			<div class="form-group">
 				<div class="input-group">
 					<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-					<input type="search" class="form-control" ng-model="query.username" placeholder="Search by Name"/>
+					<input type="search" class="form-control" ng-model="query.first_name" placeholder="Search by Name"/>
 				</div>
 			</div>
 		</div>
@@ -63,8 +63,8 @@
 		<div ng-class="needToUpdate ? 'col-md-6 pull-left col-sm-12 col-xs-12' : 'col-md-4 pull-right col-sm-6 col-xs-12'">
 
 			<div class="btn-group pull-right">
-				<label class="btn btn-primary" ng-model="radioModel" btn-radio="'users'"><i class="glyphicon glyphicon-user"></i></label>
-				<label class="btn btn-primary" ng-model="radioModel" btn-radio="'events'"><i class="glyphicon glyphicon-calendar"></i></label>
+				<label class="btn btn-radio" ng-model="radioModel" btn-radio="'users'"><i class="glyphicon glyphicon-user"></i></label>
+				<label class="btn btn-radio" ng-model="radioModel" btn-radio="'events'"><i class="glyphicon glyphicon-calendar"></i></label>
 			</div>
 
 <!--            <div class="btn-group" dropdown>
@@ -98,22 +98,22 @@
 	<div class="row">
 
 		<!-- User View -->
-		<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="partner in partners | orderBy: 'username' | filter:query as results" ng-if="partner.role != 'admin'" ng-show="radioModel === 'users'">
-			<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false" ng-class="{'btn-complete': partner.name, 'btn-empty': !partner.name}">
+		<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="partner in partners | orderBy: ['-submitted', 'last_name', 'first_name', 'username'] | filter:query as results" ng-if="partner.role != 'admin'" ng-show="radioModel === 'users'">
+			<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false" ng-class="partner.submitted ? 'box-complete' : 'box-empty'">
 				
-				<div class="text-center" ng-show="!partner.name">
+				<div class="text-center" ng-show="!partner.submitted">
 					<strong>{{partner.username}}</strong>
 				</div>
-				<div class="text-center" ng-show="partner.name">
-					<strong>{{partner.name}}</strong>
+				<div class="text-center" ng-show="partner.submitted">
+					<strong>{{partner.last_name | uppercase}}, {{partner.first_name}}</strong>
 				</div>
 
-				<p class="text-center" ng-show="!turn">{{partner.hours}} Hours</p>
+				<p class="text-center" ng-show="!turn">{{partner.hours}} hours</p>
 
 				<div class="text-center" ng-if="turn">
 					<a href="/#!/admin/user/{{partner._id}}" class="btn btn-link agency-btn"><i class="glyphicon glyphicon-eye-open"></i></a>
 
-					<button type="button" class="btn btn-link agency-btn" ng-click="deleteAgency(partner)"><i class="glyphicon glyphicon-trash"></i></button>
+					<button type="button" class="btn btn-link agency-btn" ng-click="deleteBox(partner)"><i class="glyphicon glyphicon-trash"></i></button>
 				</div>
 
 			</div>
@@ -127,12 +127,12 @@
 					<strong>{{event.date}}</strong>
 				</div>
 
-				<p class="text-center" ng-show="!turn">{{}} Volunteers</p>
+				<p class="text-center" ng-show="!turn">{{event.volunteers.length}} Volunteers</p>
 
 				<div class="text-center" ng-if="turn">
 					<a href="/#!/admin/event/{{event._id}}" class="btn btn-link agency-btn"><i class="glyphicon glyphicon-eye-open"></i></a>
 
-					<button type="button" class="btn btn-link agency-btn" ng-click="deleteAgency(event)"><i class="glyphicon glyphicon-trash"></i></button>
+					<button type="button" class="btn btn-link agency-btn" ng-click="deleteBox(event)"><i class="glyphicon glyphicon-trash"></i></button>
 				</div>
 
 			</div>

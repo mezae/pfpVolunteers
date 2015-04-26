@@ -67,10 +67,6 @@ angular.module('core').config(['$stateProvider', '$urlRouterProvider',
                 url: '/',
                 templateUrl: 'modules/core/views/home.html'
             })
-            .state('first', {
-                url: '/settings/profile',
-                templateUrl: 'modules/letters/views/firstLogin.html'
-            })
             .state('confirm', {
                 url: '/settings/profile/first',
                 templateUrl: 'modules/users/views/settings/edit-profile.client.view.html'
@@ -247,13 +243,17 @@ angular.module('letters').config(['$stateProvider',
             url: '/admin/settings',
             templateUrl: 'modules/letters/views/settings.html'
         }).
+        state('events', {
+            url: '/admin/event/:eventId',
+            templateUrl: 'modules/letters/views/events.html'
+        }).
         state('tracking', {
-            url: '/admin/agency/:articleId',
-            templateUrl: 'modules/letters/views/tracking.html'
+            url: '/admin/user/:agencyId',
+            templateUrl: 'modules/users/views/settings/edit-profile.client.view.html'
         }).
         state('agTracking', {
-            url: '/agency/:articleId',
-            templateUrl: 'modules/letters/views/tracking.html'
+            url: '/user/:agencyId',
+            templateUrl: 'modules/users/views/settings/edit-profile.client.view.html'
         }).
         state('email', {
             url: '/admin/email',
@@ -266,22 +266,19 @@ angular.module('letters').config(['$stateProvider',
         state('email-success', {
             url: '/admin/emails/success',
             templateUrl: 'modules/letters/views/esent.html'
-        }).
-        state('stats', {
-            url: '/admin/stats',
-            templateUrl: 'modules/letters/views/stats.html'
         });
     }
 ]);
 'use strict';
 /* global _: false */
 
-angular.module('letters').controller('ArticlesController', ['$scope', '$window', '$modal', '$http', '$stateParams', '$location', '$filter', 'Authentication', 'Agencies', 'Articles', 'Users', 'socket',
-    function($scope, $window, $modal, $http, $stateParams, $location, $filter, Authentication, Agencies, Articles, Users, socket) {
+angular.module('letters').controller('CommandCenterController', ['$scope', '$window', '$modal', '$http', '$location', '$filter', 'Authentication', 'Agencies', 'Events', 'Users', 'socket',
+    function($scope, $window, $modal, $http, $location, $filter, Authentication, Agencies, Events, Users, socket) {
         $scope.user = Authentication.user;
         if (!$scope.user) $location.path('/').replace();
         if ($location.search()) $scope.query = $location.search();
 
+        $scope.radioModel = 'users';
         $scope.needToUpdate = false; //helps hide sidebar when it's not needed
         $scope.alert = {
             active: false,
@@ -302,6 +299,10 @@ angular.module('letters').controller('ArticlesController', ['$scope', '$window',
             Agencies.query({}, function(users) {
                 $scope.partners = users;
                 socket.syncUpdates('users', $scope.partners);
+            });
+
+            Events.query({}, function(events) {
+                $scope.events = events;
             });
         };
 
@@ -389,15 +390,10 @@ angular.module('letters').controller('ArticlesController', ['$scope', '$window',
         };
 
         //Allows user to add/update a partner
-        $scope.saveAgency = function() {
+        $scope.save = function() {
             $scope.alert.active = false;
-            var lettersTotal = 0;
-            _.forEach([$scope.partner.children, $scope.partner.teens, $scope.partner.seniors], function(type) {
-                if (type) {
-                    lettersTotal += type;
-                }
-            });
-            if (lettersTotal > 0) {
+
+            if ($scope.radioModel === 'users') {
                 if ($scope.isNewAgency) {
                     if (_.find($scope.partners, {
                         'username': $scope.partner.username
@@ -412,36 +408,31 @@ angular.module('letters').controller('ArticlesController', ['$scope', '$window',
                     }
                 } else {
                     Agencies.update($scope.partner);
-                    // $scope.partner.$update(function(partner) {
-                    //     console.log(partner.username + ' was updated');
-                    // }, function(errorResponse) {
-                    //     console.log(errorResponse.data.message);
-                    // });
                 }
-                $scope.hideSidebar();
             } else {
-                $scope.alert = {
-                    active: true,
-                    type: 'danger',
-                    msg: 'A tracking form must include at least one letter.'
-                };
+                Events.save($scope.event, function() {
+                    console.log('great!');
+                });
             }
+            $scope.hideSidebar();
+
         };
 
-
         //Allow user to delete selected partner and all associated recipients
-        $scope.deleteAgency = function(selected) {
-            var confirmation = $window.prompt('Please type DELETE to remove ' + selected.agency + '.');
-            if (confirmation === 'DELETE') {
-                $http.delete('/agency/' + selected.username);
+        $scope.deleteBox = function(selected) {
+            var box_name, box_api;
+            if ($scope.radioModel === 'users') {
+                box_name = selected.username;
+                box_api = '/agency/';
+            } else {
+                box_name = selected.date;
+                box_api = '/events/';
             }
-            // if (confirmation === 'DELETE') {
-            //     selected.$remove(function() {
-            //         console.log('Removed agency');
-            //     }, function(errorResponse) {
-            //         console.log('Remove Failed');
-            //     });
-            // }
+
+            var confirmation = $window.prompt('Please type DELETE to remove ' + box_name + '.');
+            if (confirmation === 'DELETE') {
+                $http.delete(box_api + selected._id);
+            }
         };
 
         //Show current state of partner that user wants to edit
@@ -542,6 +533,91 @@ angular.module('letters')
 'use strict';
 /* global _: false */
 
+angular.module('letters').controller('EventsController', ['$scope', '$stateParams', '$location', '$filter', '$timeout', 'Authentication', 'Events', 'Agencies', 'Users', 'socket',
+    function($scope, $stateParams, $location, $filter, $timeout, Authentication, Events, Agencies, Users, socket) {
+        $scope.user = Authentication.user;
+
+        if (!$scope.user) $location.path('/');
+
+        $scope.adminView = $scope.user.role === 'admin';
+
+        //Helps initialize page by finding the appropriate letters
+        $scope.find = function() {
+            Agencies.query({}, function(users) {
+                $scope.users = _.filter(users, function(u) {
+                    return u.name !== '' && u.role !== 'admin';
+                });
+
+                socket.syncUpdates('users', $scope.users);
+            });
+
+            Events.get({
+                eventId: $stateParams.eventId
+            }, function(event) {
+                $scope.currentEvent = event;
+            });
+        };
+
+        $scope.addVolunteer = function() {
+            $scope.newVolunteer = true;
+        };
+
+        $scope.cancel = function() {
+            $scope.newVolunteer = false;
+            $scope.newVol = null;
+        };
+
+        $scope.save = function() {
+            $scope.volProfile = $scope.users[$scope.volProfile];
+            $scope.volProfile.hours = $scope.newVol.hours;
+            $scope.newVol.name = $scope.volProfile.first_name + ' ' + $scope.volProfile.last_name;
+            $scope.currentEvent.volunteers.push($scope.newVol);
+            $scope.users = _.filter($scope.users, function(u) {
+                return u.name !== $scope.newVol.name;
+            });
+
+            Events.update($scope.currentEvent, function(response) {
+                $scope.newVol = null;
+                $scope.newVolunteer = false;
+                $scope.currentEvent = response;
+
+                Agencies.update($scope.volProfile, function(response) {
+                    $scope.volProfile = null;
+                })
+            });
+        };
+
+        $scope.deleteVolunteer = function(index) {
+            $scope.currentEvent.volunteers.splice(index, 1);
+            Events.update($scope.currentEvent, function(response) {
+                $scope.newVol = null;
+                $scope.newVolunteer = false;
+                $scope.currentEvent = response;
+            });
+        }
+
+        //Helps clean up sloppy user input
+        function cleanText(text, priority) {
+            if ((text === text.toLowerCase() || text === text.toUpperCase()) && priority === 1) {
+                return text.replace(/\w\S*/g, function(txt) {
+                    return _.capitalize(txt);
+                });
+            } else if (text === text.toUpperCase()) {
+                return text.toLowerCase();
+            } else {
+                return text;
+            }
+        }
+
+        $scope.$on('$destroy', function() {
+            socket.unsyncUpdates('users');
+        });
+
+    }
+]);
+'use strict';
+/* global _: false */
+
 angular.module('letters').controller('myController', ['$scope', '$window', '$modal', '$location', '$filter', '$http', 'Authentication', 'Users', 'Articles',
     function($scope, $window, $modal, $location, $filter, $http, Authentication, Users, Articles) {
         $scope.user = Authentication.user;
@@ -613,557 +689,6 @@ angular.module('letters').controller('myController', ['$scope', '$window', '$mod
             }).error(function(response) {
                 $scope.error = response.message;
             });
-        };
-    }
-]);
-'use strict';
-/* global _: false */
-
-angular.module('letters')
-
-.controller('SummaryController', ['$scope', '$window', '$location', '$filter', 'Authentication', 'Agencies', 'Articles',
-    function($scope, $window, $location, $filter, Authentication, Agencies, Articles) {
-        $scope.authentication = Authentication;
-
-        if (!$scope.authentication.user) $location.path('/');
-
-        angular.element($window).on('resize', function() {
-            $scope.$apply();
-        });
-
-        $scope.partners = Agencies.query(function() {
-
-            var names = ['Not Yet Started', 'In Progress', 'Completed', 'Submitted', 'Under Review', 'Reviewed'];
-            var groups = _.countBy($scope.partners, function(tf) {
-                return tf.status;
-            });
-
-            $scope.status = [];
-            _.forEach(groups, function(c, g) {
-                $scope.status.push({
-                    status: g,
-                    name: names[g],
-                    count: c,
-                    percent: (c / $scope.partners.length * 100).toFixed(1) + '%'
-                });
-            });
-
-        });
-
-        $scope.letters = Articles.query(function() {
-            var useful = $filter('filter')($scope.letters, {
-                updated: '!' + null
-            });
-
-            var counts = _.countBy(useful, function(letter) {
-                return $filter('date')(letter.updated, 'yyyy-MM-dd');
-            });
-
-            var activeDays = [];
-            _.forEach(counts, function(count, date) {
-                activeDays.push(date);
-            });
-
-            activeDays = activeDays.sort(function(a, b) {
-                return b < a;
-            });
-
-            $scope.wishesAdded = [];
-            var current = activeDays[0];
-            var endDate = new Date();
-            endDate.setDate(endDate.getDate() + 1);
-            endDate = $filter('date')(endDate, 'yyyy-MM-dd');
-            while (current !== endDate) {
-                $scope.wishesAdded.push({
-                    date: current,
-                    count: counts[current] ? counts[current] : 0
-                });
-                current = new Date(current);
-                current.setDate(current.getDate() + 2);
-                current = $filter('date')(current, 'yyyy-MM-dd');
-            }
-
-            var wordCounts = [];
-            var fillers = ' , a, an, and, but, or, the, this, that, for, is, it, my, your, i, am, is, be, you, me, it, he, she, to, please, dont, who, what, where, when, why, how, which, with';
-
-            _.forEach(useful, function(letter) {
-                var words = _.words(letter.gift);
-
-                _.forEach(words, function(word) {
-                    word = word.toLowerCase();
-                    if (!_.includes(fillers, word)) {
-                        var cc = _.find(wordCounts, {
-                            'name': word
-                        });
-                        if (cc) {
-                            cc.value += 1;
-                        } else {
-                            wordCounts.push({
-                                name: word,
-                                value: 1
-                            });
-                        }
-                    }
-                });
-            });
-
-            var sorted = _.sortBy(wordCounts, function(word) {
-                return -word.value;
-            });
-
-            $scope.gifts = _.take(sorted, 10);
-
-        });
-
-    }
-]);
-'use strict';
-/* global _: false */
-
-angular.module('letters').controller('AgencyController', ['$scope', '$q', '$stateParams', '$location', '$anchorScroll', '$filter', '$timeout', '$modal', 'Authentication', 'Articles', 'Agencies', 'Users',
-    function($scope, $q, $stateParams, $location, $anchorScroll, $filter, $timeout, $modal, Authentication, Articles, Agencies, Users) {
-        $scope.user = Authentication.user;
-
-        if (!$scope.user) $location.path('/');
-
-        $scope.adminView = $scope.user.role === 'admin';
-        var currentIndex = 0;
-
-        //Helps initialize page by finding the appropriate letters
-        $scope.find = function() {
-            if ($scope.adminView) {
-                $scope.currentAgency = Agencies.get({
-                    agencyId: $stateParams.articleId
-                }, function() {
-                    init();
-                });
-            } else {
-                $scope.currentAgency = $scope.user;
-                init();
-                Agencies.query(function(users) {
-                    var admin = _.find(users, {
-                        'username': 'AAA'
-                    });
-                    var due = $filter('date')(admin.due, 'MM/dd/yy');
-
-                    if ($scope.currentAgency.status < 3) showCountdown(admin.due);
-                });
-            }
-        };
-
-        function showCountdown(deadline) {
-            var countdown = dateDiff(new Date(), new Date(deadline));
-            if (countdown === 14) {
-                $scope.alert = {
-                    type: 'warning',
-                    msg: 'Two weeks left'
-                };
-            } else if (countdown === 7) {
-                $scope.alert = {
-                    type: 'warning',
-                    msg: 'One week left'
-                };
-            } else if (countdown === 0) {
-                $scope.alert = {
-                    type: 'danger',
-                    msg: 'Last day to submit'
-                };
-            } else if (countdown === 1) {
-                $scope.alert = {
-                    type: 'danger',
-                    msg: 'One day left'
-                };
-            } else if (countdown < 0) {
-                $scope.alert = {
-                    type: 'danger',
-                    msg: 'Past due -- please submit it ASAP'
-                };
-            } else if (countdown <= 3) {
-                $scope.alert = {
-                    type: 'danger',
-                    msg: countdown + ' days left'
-                };
-            }
-            $scope.alert.active = $scope.alert.msg.length;
-        }
-
-        function init() {
-            $scope.tabs = [{
-                title: 'Children',
-                content: $scope.currentAgency.children,
-                active: false,
-                minAge: 4,
-                maxAge: 13
-            }, {
-                title: 'Teens',
-                content: $scope.currentAgency.teens,
-                active: false,
-                minAge: 14,
-                maxAge: 18
-            }, {
-                title: 'Seniors',
-                content: $scope.currentAgency.seniors,
-                active: false,
-                minAge: 65,
-                maxAge: 125
-            }];
-
-            $scope.activateTab($scope.currentAgency.children > 0 ? $scope.tabs[0] : ($scope.currentAgency.teens > 0 ? $scope.tabs[1] : $scope.tabs[2]));
-
-            if ((!$scope.adminView && $scope.currentAgency.status >= 3) || ($scope.adminView && $scope.currentAgency.status === 5)) downloadCSV();
-        }
-
-        //Allows user to work on another tab
-        $scope.activateTab = function(clicked, form) {
-            $scope.currentTab = clicked;
-            clicked.active = true;
-            $scope.recipients = Articles.query({
-                username: $stateParams.articleId + clicked.title.charAt(0),
-                limit: 50
-            }, function() {
-                $scope.minAge = clicked.minAge;
-                $scope.maxAge = clicked.maxAge;
-                var blankRecord = _.findIndex($scope.recipients, {
-                    'name': ''
-                });
-                currentIndex = blankRecord ? blankRecord : 0;
-                updateForm(form);
-            });
-        };
-
-        //Helps find how many days are left until the deadline
-        function dateDiff(a, b) {
-            var MS_PER_DAY = 1000 * 60 * 60 * 24;
-            // Discard the time and time-zone information.
-            var utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-            var utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-            return Math.floor((utc2 - utc1) / MS_PER_DAY);
-        }
-
-        //Allows admin to add a blank letter and shift everything down
-        $scope.addBlank = function() {
-            var letter = new Articles({
-                track: $scope.current.track
-            });
-            letter.$save(function(response) {
-                Articles.query({
-                    username: $stateParams.articleId + $scope.currentTab.title.charAt(0),
-                    limit: $scope.recipients.length
-                }, function(letters) {
-                    $scope.recipients = letters;
-                });
-            }, function(errorResponse) {
-                console.log('response');
-            });
-        };
-
-        //Allows admin to delete an existing letter and shift everything up
-        //Allows user to clear the current slot
-        $scope.clearForm = function(selected) {
-            if ($scope.adminView) {
-                selected.$remove(function(response) {
-                    Articles.query({
-                        username: $stateParams.articleId + $scope.currentTab.title.charAt(0),
-                        limit: $scope.recipients.length
-                    }, function(letters) {
-                        $scope.recipients = letters;
-                    });
-                }, function(errorResponse) {
-                    console.log('Remove Failed');
-                });
-            } else {
-                $scope.current.name = '';
-                $scope.current.age = '';
-                $scope.current.gender = '';
-                $scope.current.gift = '';
-                $scope.current.$update();
-            }
-        };
-
-        //Helps to show user appropriate age range of each recipient type
-        function updateForm(form) {
-            if (form) {
-                form.$setPristine();
-                form.$setUntouched();
-            }
-            $scope.current = $scope.recipients[currentIndex];
-            if (currentIndex % 10 === 9) {
-                $location.hash(currentIndex + 1);
-                $anchorScroll();
-            }
-
-            var limit = 50;
-            if (currentIndex % limit === limit - 15 && $scope.recipients.length < $scope.currentTab.content) {
-                $scope.loadMore(currentIndex + 15);
-            }
-        }
-
-        $scope.loadMore = function(records) {
-            Articles.query({
-                username: $stateParams.articleId + $scope.currentTab.title.charAt(0),
-                offset: records,
-                limit: 50
-            }, function(letters) {
-                $q.all([$scope.recipients, letters]).then(function(data) {
-                    $scope.recipients = data[0].concat(data[1]);
-                });
-            });
-        };
-
-        //Allow user to see/edit the next record if current letter is valid
-        $scope.goToNext = function(form) {
-            if (isValidLetter(form)) {
-                if (currentIndex < $scope.recipients.length - 1) {
-                    currentIndex++;
-                    updateForm(form);
-                } else {
-                    $scope.alert = {
-                        active: true,
-                        type: 'info',
-                        msg: 'You just entered the last letter on this page.'
-                    };
-                }
-            }
-        };
-
-        //Allow user to see the record they selected if current letter is valid
-        $scope.goToSelected = function(selected, form) {
-            if (isValidLetter(form) && !form.$invalid) {
-                currentIndex = selected;
-                updateForm(form);
-            }
-        };
-
-        //Make form more user-friendly, make required fields glow
-        $scope.isUsed = function(form) {
-            if ($scope.current.name) {
-                $scope.blankName = false;
-                form.age.$setTouched();
-                form.gender.$setTouched();
-                form.gift.$setTouched();
-            } else {
-                form.$setUntouched();
-            }
-        };
-
-        //Check if age entered is within valid range
-        $scope.isWithinRange = function(age) {
-            age.$setValidity('inRange', $scope.current.age === null || ($scope.current.age >= $scope.minAge && $scope.current.age <= $scope.maxAge));
-        };
-
-        //Help validate user's data entry
-        function isValidLetter(form) {
-            //It's OK if no data was entered
-            if (!$scope.current.name && !$scope.current.age && !$scope.current.gender && !$scope.current.gift) {
-                return true;
-            }
-            //It's not OK if some fields are missing
-            else if (!$scope.current.name || !$scope.current.age || !$scope.current.gender || !$scope.current.gift) {
-                $scope.blankName = !$scope.current.name;
-                $scope.error = 'fields cannot be left blank';
-                $timeout(function() {
-                    $scope.blankName = false;
-                    $scope.error = null;
-                }, 2000);
-                return false;
-            }
-            //It's great when all fields are entered properly
-            else {
-                addRecipient(form);
-                return true;
-            }
-        }
-
-        //Helps update/add recipient record
-        function addRecipient(form) {
-            $scope.current.name = cleanText($scope.current.name, 1).trim();
-            $scope.current.gender = $scope.current.gender.toUpperCase();
-            $scope.current.gift = cleanText($scope.current.gift, 2);
-
-            //update Agency status
-            if ($scope.currentAgency.status === 0) {
-                $scope.currentAgency.status = 1;
-                var user = new Users($scope.currentAgency);
-                user.$update(function(response) {
-                    $scope.currentAgency = response;
-                });
-            }
-
-            $scope.current.$update();
-        }
-
-        //Helps clean up sloppy user input
-        function cleanText(text, priority) {
-            if ((text === text.toLowerCase() || text === text.toUpperCase()) && priority === 1) {
-                return text.replace(/\w\S*/g, function(txt) {
-                    return _.capitalize(txt);
-                });
-            } else if (text === text.toUpperCase()) {
-                return text.toLowerCase();
-            } else {
-                return text;
-            }
-        }
-
-        //Allows admin to complete the review of a tracking form
-        //Allows community partner to submit their completed tracking form
-        $scope.confirmCompletion = function() {
-            var user = null;
-            if ($scope.adminView) {
-                rateAgencyToComplete();
-            } else {
-                var dblcheck = confirm('Click OK to let the Winter Wishes Team know that your tracking form is ready. You will not be able to make any further changes.');
-                if (dblcheck) {
-                    $scope.currentAgency.status = 3;
-                    user = new Users($scope.currentAgency);
-                    user.$update(function(response) {
-                        $scope.currentAgency = response;
-                        downloadCSV();
-                    }, function(response) {
-                        $scope.error = response.data.message;
-                    });
-                }
-            }
-        };
-
-        //Allows admin to start the review of a tracking form
-        $scope.startReview = function() {
-            $scope.currentAgency.status = 4;
-            var user = new Agencies($scope.currentAgency);
-            user.$update(function(response) {
-                $scope.currentAgency = response;
-            }, function(response) {
-                $scope.error = response.data.message;
-            });
-        };
-
-        //Allows admin to flag sub par letters during review
-        $scope.flagLetter = function(selected) {
-            selected.flagged = !selected.flagged;
-            selected.$update();
-        };
-
-        //Allows admin to reject a tracking form with many sub par letters
-        $scope.returnLetters = function() {
-            $scope.currentAgency.status = 1;
-            var user = new Agencies($scope.currentAgency);
-            user.$update(function(response) {
-                $scope.currentAgency = response;
-            }, function(response) {
-                $scope.error = response.data.message;
-            });
-        };
-
-        //Helps create a downloadable csv version of the tracking form
-        function downloadCSV() {
-            var headers = ['track', 'name', 'age', 'gender', 'gift'];
-            if ($scope.adminView) {
-                headers.push('flagged');
-            }
-            var csvString = headers.join(',') + '\r\n';
-            var Recipients = Articles.query({
-                username: $stateParams.articleId
-            }, function() {
-                _.forEach(Recipients, function(letter) {
-                    if (letter.name) {
-                        _.forEach(headers, function(key) {
-                            var line = letter[key];
-                            if (key === 'gift' && _.indexOf(letter[key], ',')) {
-                                line = '"' + letter[key] + '"';
-                            }
-                            csvString += line + ',';
-                        });
-                        csvString += '\r\n';
-                    }
-                });
-
-                var date = $filter('date')(new Date(), 'MM-dd');
-                $scope.fileName = ('WishesToSF_' + $scope.currentAgency.username + '_' + date + '.csv');
-                var blob = new Blob([csvString], {
-                    type: 'text/csv;charset=UTF-8'
-                });
-                $scope.url = window.URL.createObjectURL(blob);
-            });
-
-        }
-
-        //Allows partner to let WWT know whether a gift has been received
-        $scope.giftReceived = function(selected) {
-            selected.received = !selected.received;
-            selected.$update();
-        };
-
-        function rateAgencyToComplete() {
-            var modalInstance = $modal.open({
-                templateUrl: 'modules/letters/views/rating.html',
-                controller: 'RatingCtrl',
-                backdrop: 'static',
-                size: 'md',
-                resolve: {
-                    rating: function() {
-                        return $scope.currentAgency.rating;
-                    }
-                }
-            });
-
-            modalInstance.result.then(function(result) {
-                $scope.currentAgency.rating = result;
-                $scope.currentAgency.status = 5;
-                var user = new Agencies($scope.currentAgency);
-                user.$update(function(response) {
-                    $scope.currentAgency = response;
-                    downloadCSV();
-                }, function(response) {
-                    $scope.error = response.data.message;
-                });
-            });
-        }
-
-    }
-])
-
-.controller('RatingCtrl', ['$scope', '$timeout', '$modalInstance', 'rating',
-    function($scope, $timeout, $modalInstance, rating) {
-        $scope.rating = rating;
-
-        $scope.hoveringOver = function(value, rating) {
-            $scope.overStar = value;
-            $scope.desc = {
-                percent: 100 * (value / 5)
-            };
-            switch (value) {
-                case 1:
-                    $scope.desc.words = 'None';
-                    break;
-                case 2:
-                    $scope.desc.words = 'Scarce';
-                    break;
-                case 3:
-                    $scope.desc.words = 'Some';
-                    break;
-                case 4:
-                    $scope.desc.words = 'Good';
-                    break;
-                case 5:
-                    $scope.desc.words = 'Great';
-                    break;
-            }
-            $scope.active = rating;
-        };
-
-        $scope.updateOverall = function() {
-            $scope.rating.overall = ($scope.rating.content + $scope.rating.decoration) / 2;
-        };
-
-        $scope.ok = function() {
-            if ($scope.rating.overall > 0) {
-                $modalInstance.close($scope.rating);
-            } else {
-                $scope.error = 'your feedback would be greatly appreciated';
-                $timeout(function() {
-                    $scope.error = null;
-                }, 2000);
-            }
         };
     }
 ]);
@@ -1316,7 +841,7 @@ angular.module('letters').directive('activity', function() {
 angular.module('letters').factory('Agencies', ['$resource',
     function($resource) {
         return $resource('agency/:agencyId', {
-            agencyId: '@username'
+            agencyId: '@_id'
         }, {
             update: {
                 method: 'PUT'
@@ -1551,10 +1076,10 @@ angular.module('letters').directive('donut', ['$location',
 'use strict';
 
 //Letters service used for communicating with the letters REST endpoints
-angular.module('letters').factory('Articles', ['$resource',
+angular.module('letters').factory('Events', ['$resource',
     function($resource) {
-        return $resource('articles/:articleId/:controller', {
-            articleId: '@_id'
+        return $resource('events/:eventId', {
+            eventId: '@_id'
         }, {
             update: {
                 method: 'PUT'
@@ -1724,44 +1249,6 @@ angular.module('letters').directive('donutChart', function() {
 });
 'use strict';
 
-// Users service used for communicating with the users REST endpoint
-angular.module('letters').factory('Users', ['$resource',
-	function($resource) {
-		return $resource('users', {}, {
-			update: {
-				method: 'PUT'
-			}
-		});
-	}
-]);
-
-// angular.module('2meanApp')
-//     .factory('User', function($resource) {
-//         return $resource('/api/users/:id/:controller', {
-//             id: '@_id'
-//         }, {
-//             changePassword: {
-//                 method: 'PUT',
-//                 params: {
-//                     controller: 'password'
-//                 }
-//             },
-//             updateProfile: {
-//                 method: 'PUT',
-//                 params: {
-//                     controller: 'profile'
-//                 }
-//             },
-//             get: {
-//                 method: 'GET',
-//                 params: {
-//                     id: 'me'
-//                 }
-//             }
-//         });
-//     });
-'use strict';
-
 // Config HTTP Error Handling
 angular.module('users').config(['$httpProvider',
     function($httpProvider) {
@@ -1864,14 +1351,10 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$http
         $scope.user = Authentication.user;
 
         function redirect(user) {
-            if (user.username === 'AAA') {
+            if (user.role === 'admin') {
                 $location.path('/admin');
             } else {
-                if (!user.zip) {
-                    $location.path('/first');
-                } else {
-                    $location.path('/agency/' + user.username);
-                }
+                $location.path('/user/' + user._id);
             }
         }
 
@@ -1888,24 +1371,6 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$http
                 $scope.error = response.message;
             });
         };
-
-        // $scope.signin = function(form) {
-        //     $scope.submitted = true;
-
-        //     if (form) {
-        //         console.log('yes');
-        //         Authentication.login($scope.credentials)
-        //             .then(function() {
-        //                 console.log($scope.user);
-        //                 // Logged in, redirect to home
-        //                 var newURL = $scope.isAdmin ? '/admin' : '/';
-        //                 $location.path(newURL);
-        //             })
-        //             .catch(function(err) {
-        //                 $scope.errors.other = err.message;
-        //             });
-        //     }
-        // };
 
         $scope.signup = function() {
             $http.post('/auth/signup', $scope.credentials).success(function(response) {
@@ -1962,29 +1427,43 @@ angular.module('users').controller('PasswordController', ['$scope', '$stateParam
 	}
 ]);
 'use strict';
+/* global _: false */
 
-angular.module('users').controller('SettingsController', ['$scope', '$http', '$location', 'Users', 'Authentication',
-    function($scope, $http, $location, Users, Authentication) {
+angular.module('users').controller('SettingsController', ['$scope', '$http', '$location', '$stateParams', 'Users', 'Agencies', 'Authentication', 'Events',
+    function($scope, $http, $location, $stateParams, Users, Agencies, Authentication, Events) {
         $scope.user = Authentication.user;
-        $scope.isFirstLogin = $location.path() === '/settings/profile/first';
 
         // If user is not signed in then redirect back home
         if (!$scope.user) $location.path('/');
+
+        $scope.currentUser = Agencies.get({
+            agencyId: $stateParams.agencyId
+        });
+
+        $scope.relatedEvents = Events.query({}, function() {
+            $scope.relatedEvents = _.filter($scope.relatedEvents, function(event) {
+                return _.find(event.volunteers, {
+                    'name': $scope.currentUser.first_name + ' ' + $scope.currentUser.last_name
+                });
+            });
+
+            $scope.relatedEvents = _.map($scope.relatedEvents, function(event) {
+                event.volunteers = _.find(event.volunteers, {
+                    'name': $scope.currentUser.first_name + ' ' + $scope.currentUser.last_name
+                });
+                return event;
+            });
+        });
+
+        $scope.radioModel = 'users';
 
         // Update a user profile
         $scope.updateUserProfile = function(isValid) {
             if (isValid) {
                 $scope.success = $scope.error = null;
-                var user = new Users($scope.user);
 
-                user.$update(function(response) {
-                    $scope.success = true;
-                    Authentication.user = response;
-                    var newPage = $scope.isFirstLogin ? '/settings/profile' : '/';
-                    $location.path(newPage);
-                }, function(response) {
-                    $scope.error = response.data.message;
-                });
+                Agencies.update($scope.currentUser);
+
             } else {
                 $scope.submitted = true;
             }
@@ -2170,11 +1649,11 @@ angular.module('users').factory('Authentication', [
 
 // Users service used for communicating with the users REST endpoint
 angular.module('users').factory('Users', ['$resource',
-	function($resource) {
-		return $resource('users', {}, {
-			update: {
-				method: 'PUT'
-			}
-		});
-	}
+    function($resource) {
+        return $resource('users', {}, {
+            update: {
+                method: 'PUT'
+            }
+        });
+    }
 ]);

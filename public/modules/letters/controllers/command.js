@@ -148,18 +148,20 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
         };
 
         //Allow user to delete selected partner and all associated recipients
-        $scope.deleteAgency = function(selected) {
-            var confirmation = $window.prompt('Please type DELETE to remove ' + selected.agency + '.');
-            if (confirmation === 'DELETE') {
-                $http.delete('/agency/' + selected.username);
+        $scope.deleteBox = function(selected) {
+            var box_name, box_api;
+            if ($scope.radioModel === 'users') {
+                box_name = selected.username;
+                box_api = '/agency/';
+            } else {
+                box_name = selected.date;
+                box_api = '/events/';
             }
-            // if (confirmation === 'DELETE') {
-            //     selected.$remove(function() {
-            //         console.log('Removed agency');
-            //     }, function(errorResponse) {
-            //         console.log('Remove Failed');
-            //     });
-            // }
+
+            var confirmation = $window.prompt('Please type DELETE to remove ' + box_name + '.');
+            if (confirmation === 'DELETE') {
+                $http.delete(box_api + selected._id);
+            }
         };
 
         //Show current state of partner that user wants to edit
