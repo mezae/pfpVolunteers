@@ -1,0 +1,30 @@
+
+<section class="row" data-ng-controller="AuthenticationController">
+
+	<div class="col-md-12">
+
+	<div class="col-md-3 col-sm-5 col-xs-10 login-box">
+
+		<form name="userForm" data-ng-submit="signin(userForm.$valid)" class="signin" autocomplete="off">
+			<fieldset>
+				<div class="form-group">
+					<input type="text" id="username" name="username" class="profile form-control input-lg" data-ng-model="credentials.username" placeholder="username">
+					<input type="password" id="password" name="password" class="profile form-control input-lg" data-ng-model="credentials.password" placeholder="password">
+				</div>
+				<div class="text-center form-group">
+					<button type="submit" class="ebtn btn-login btn-block">Login</button>
+				</div>
+				<div class="forgot-password text-center">
+					<a href="/#!/password/forgot">forgot your password?</a>
+				</div>
+				<div data-ng-show="error" class="text-center text-danger">
+					<strong data-ng-bind="error"></strong>
+				</div>
+			</fieldset>
+		</form>
+
+	</div>
+
+	</div>
+
+</section>

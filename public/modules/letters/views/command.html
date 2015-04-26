@@ -1,0 +1,158 @@
+
+<section data-ng-controller="CommandCenterController" data-ng-init="find()">
+
+	<div class="row">
+
+		<div class="col-md-12">
+			<h2>Command Center</h2>
+		</div>
+
+		<div class="col-md-12">
+			<alert ng-show="alert.active" type="{{alert.type}}" ng-model="alert" close="alert.active = false">{{alert.msg}}</alert>
+		</div>
+		
+	</div>
+
+	<div class="row">
+		<div class="col-md-3 pull-right col-sm-12 col-xs-12 nga-default nga-stagger nga-slide-right hidden-print" ng-show="needToUpdate">
+			<form role="form" ng-show="!partner">
+				<div class="form-group">
+					<label class="sr-only" for="the_file">File input</label>
+					<div class="input-group">
+						<span class="input-group-btn">
+							<span class="btn btn-review btn-file">
+								Browse <input type="file" id="the_file" accept=".csv" onchange="angular.element(this).scope().fileInfo(this)">
+							</span>
+						</span>
+						<input type="text" class="form-control filename col-md-4" ng-model="file.name" id="filename" readonly>
+						<span class="input-group-btn">
+						<input type="button" class="btn btn-review" ng-click="handleFileSelect()" value="Upload"/>
+						</span>
+					</div>
+				</div>
+			</form>
+
+			<form role="form">
+				<div class="form-group">
+					<label>Contact Info</label>
+					<input type="text" class="profile form-control" ng-model="partner.username" placeholder="username" ng-show="radioModel === 'users'">
+					<input type="text" class="profile form-control" ng-model="event.date" placeholder="event date" ng-show="radioModel === 'events'">
+				</div>
+
+				<input type="button" class="btn btn-empty col-md-4 col-sm-3 col-xs-3 pull-left" ng-click="hideSidebar()" value="Cancel">
+				<div class="form-group">
+					<input type="button" class="btn btn-complete col-md-4 col-sm-3 col-xs-3 pull-right" ng-click="save()" value="Save">
+				</div>
+				<br/><br/>
+			</form>
+		</div>
+
+
+	<div ng-class="needToUpdate ? 'col-md-9 pull-left col-sm-12 clearfix col-xs-12 clearfix' : 'col-md-12 col-sm-12 col-xs-12'">
+ 
+	<div class="row">
+		<div ng-class="needToUpdate ? 'col-md-6 pull-left col-sm-12 clearfix col-xs-12 clearfix' : 'col-md-4 col-sm-6 col-xs-12'">
+			<div class="form-group">
+				<div class="input-group">
+					<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+					<input type="search" class="form-control" ng-model="query.username" placeholder="Search by Name"/>
+				</div>
+			</div>
+		</div>
+
+		<div ng-class="needToUpdate ? 'col-md-6 pull-left col-sm-12 col-xs-12' : 'col-md-4 pull-right col-sm-6 col-xs-12'">
+
+			<div class="btn-group pull-right">
+				<label class="btn btn-primary" ng-model="radioModel" btn-radio="'users'"><i class="glyphicon glyphicon-user"></i></label>
+				<label class="btn btn-primary" ng-model="radioModel" btn-radio="'events'"><i class="glyphicon glyphicon-calendar"></i></label>
+			</div>
+
+<!--            <div class="btn-group" dropdown>
+			  <button type="button" class="btn btn-default"><i class="glyphicon glyphicon-filter"></i> Filter by Status</button>
+			  <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle>
+				<span class="caret"></span>
+				<span class="sr-only">Split button!</span>
+			  </button>
+			  <ul class="dropdown-menu" role="menu">
+				<li><a href="#">Action</a></li>
+				<li><a href="#">Another action</a></li>
+				<li><a href="#">Something else here</a></li>
+				<li class="divider"></li>
+				<li><a href="#">Separated link</a></li>
+			  </ul>
+			</div> -->
+
+<!--            <div class="form-group">
+				<select class="form-control" ng-model="query.status" ng-change="updateURL()">
+					<option value="">Filter by Status</option>
+					<option value="0">Not Yet Started</option>
+					<option value="1">In Progress</option>
+					<option value="3">Submitted</option>
+					<option value="4">Under Review</option>
+					<option value="5">Reviewed</option>
+				</select>
+			</div> -->
+		</div>
+	</div>
+
+	<div class="row">
+
+		<!-- User View -->
+		<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="partner in partners | orderBy: 'username' | filter:query as results" ng-if="partner.role != 'admin'" ng-show="radioModel === 'users'">
+			<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false" ng-class="{'btn-complete': partner.name, 'btn-empty': !partner.name}">
+				
+				<div class="text-center" ng-show="!partner.name">
+					<strong>{{partner.username}}</strong>
+				</div>
+				<div class="text-center" ng-show="partner.name">
+					<strong>{{partner.name}}</strong>
+				</div>
+
+				<p class="text-center" ng-show="!turn">{{partner.hours}} Hours</p>
+
+				<div class="text-center" ng-if="turn">
+					<a href="/#!/admin/user/{{partner._id}}" class="btn btn-link agency-btn"><i class="glyphicon glyphicon-eye-open"></i></a>
+
+					<button type="button" class="btn btn-link agency-btn" ng-click="deleteAgency(partner)"><i class="glyphicon glyphicon-trash"></i></button>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Event View -->
+		<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="event in events | orderBy: 'date' | filter:query as results" ng-show="radioModel === 'events'">
+			<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false">
+				
+				<div class="text-center">
+					<strong>{{event.date}}</strong>
+				</div>
+
+				<p class="text-center" ng-show="!turn">{{}} Volunteers</p>
+
+				<div class="text-center" ng-if="turn">
+					<a href="/#!/admin/event/{{event._id}}" class="btn btn-link agency-btn"><i class="glyphicon glyphicon-eye-open"></i></a>
+
+					<button type="button" class="btn btn-link agency-btn" ng-click="deleteAgency(event)"><i class="glyphicon glyphicon-trash"></i></button>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Add New User OR Event-->
+		<div class="col-xs-6 col-sm-3 hidden-print" ng-class="needToUpdate ? 'col-md-3' : ' col-md-2'">
+		  <div class="agency-box" ng-click="query.status ? updateURL(true) : showSidebar()">
+			<div class="vcenter text-center">
+				<div class="btn btn-link" ng-class="query.status ? 'badflag' : agency-btn">
+					<i class="glyphicon glyphicon-plus" ng-hide="query.status"></i>
+					<p ng-show="query.status">Clear <i class="glyphicon glyphicon-filter"></i></p>
+				</div>
+			</div>
+		  </div>
+		</div>
+
+	  </div>
+	</div>
+
+  </div>
+
+</section>

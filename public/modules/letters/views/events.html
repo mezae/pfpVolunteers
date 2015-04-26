@@ -1,0 +1,49 @@
+<section class="row" data-ng-controller="EventsController" ng-init="find()">
+
+	<h3 class="col-md-12 text-center">Event - {{currentEvent.date}}</h3>
+
+	<div class="col-xs-offset-2 col-xs-8 col-md-offset-4 col-md-4">
+
+		<table class="table table-striped">
+			<tr>
+				<th class="col-md-6">Volunteer Name</th>
+				<th class="col-md-6"># of Hours</th>
+			</tr>
+			<tr ng-repeat="volunteer in currentEvent.volunteers" ng-mouseenter="turn = true" ng-mouseleave="turn = false">
+				<td>{{volunteer.name}}</td>
+				<td>{{volunteer.hours}}
+					<button class="btn btn-sm btn-link pull-right" ng-show="turn" ng-click="deleteVolunteer($index)"><i class="glyphicon glyphicon-remove"></i></button></td>
+			</tr>
+			<tr ng-show="newVolunteer">
+				<td>
+					<select class="profile form-control text-center" ng-model="newVol.name">
+						<option value="" class="text-center">name</option>
+						<option ng-repeat="user in users" value="{{user.name}}">{{user.name}}</option>
+					</select>
+					<!-- <input type="text" class="profile form-control text-center" ng-model="newVol.name" placeholder="name"> -->
+				</td>
+				<td>
+					<input type="number" class="profile form-control text-center" ng-model="newVol.hours" placeholder="hours">
+				</td>
+			</tr>
+			<tr ng-show="newVolunteer">
+				<td>
+					<input type="button" class="btn btn-empty col-md-6 col-sm-3 col-xs-3 pull-left" ng-click="cancel()" value="Cancel">
+				</td>
+				<td>
+					<input type="button" class="btn btn-complete col-md-6 col-sm-3 col-xs-3 pull-right" ng-click="save()" value="Save">
+				</td>
+			</tr>
+			<tr ng-hide="newVolunteer || !currentEvent.volunteers.length">
+				<td><strong>Total</strong></td>
+				<td>{{currentEvent.total}}</td>
+			</tr>
+		</table>
+
+		<div class="text-center" ng-hide="newVolunteer || !users.length">
+			<button class="btn btn-review" ng-click="addVolunteer()">Add Volunteer</button>
+		</div>
+
+	</div>
+
+</section>

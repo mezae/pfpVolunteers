@@ -1,0 +1,89 @@
+/*command center*/
+.vcenter {
+  line-height: 50px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.deleteAgency {
+  position: absolute;
+  top: 0.3em;
+  right: 1.5em;
+}
+
+.evcenter {
+  line-height: 10em;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.emailnail {
+  height: 10em;
+}
+
+.editEtemplate {
+  position: absolute;
+  top: 10.2em;
+  right: 1.5em;
+}
+
+.agency-box {
+	border-width: 1px;
+	border-style: solid;
+	border-color: #ccc;
+	padding: 20px 1px;
+  display: block;
+  margin-bottom: 20px;
+  line-height: 1.42857143;
+  border-radius: 4px;
+  min-height: 92px;
+  transition: border .2s ease-in-out;
+  -o-transition: border .2s ease-in-out;
+  -webkit-transition: border .2s ease-in-out;
+}
+
+.btn {
+  background-color: white;
+}
+
+.btn-ready {
+	color: #7b39c7;
+  border-color:#7b39c7;
+}
+
+.btn-review, .filename {
+  color: #4d92cd;
+  border-color: #4d92cd;
+}
+
+.btn-complete {
+	 color: #85c739;
+	 border-color: #85c739;
+}
+
+.btn-started {
+	color: #cd884d;
+	border-color: #cd884d;
+}
+
+.btn-empty {
+	color: #cd4d52;
+  border-color: #cd4d52;
+}
+
+.filename {
+  border-left: 0;
+}
+
+a.btn-ready, a.btn-review, a.btn-complete, a.btn-started, a.btn-empty {
+	border: none;
+	box-shadow: none;
+}
+
+.agency-btn {
+  padding: 4px 8px;
+}
+
+.agency-mid {
+  padding: 4px 15px;
+}
