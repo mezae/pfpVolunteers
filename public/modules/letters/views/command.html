@@ -55,7 +55,8 @@
 			<div class="form-group">
 				<div class="input-group">
 					<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-					<input type="search" class="form-control" ng-model="query.first_name" placeholder="Search by First Name"/>
+					<input type="search" class="form-control" ng-model="query.first_name" ng-show="radioModel === 'users'" placeholder="Search by First Name"/>
+					<input type="search" class="form-control" ng-model="query.date" ng-show="radioModel === 'events'" placeholder="Search by date"/>
 				</div>
 			</div>
 		</div>

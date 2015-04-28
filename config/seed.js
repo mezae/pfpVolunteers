@@ -8,7 +8,6 @@ var chalk = require('chalk');
 var User = require('../app/models/user.server.model.js');
 var Event = require('../app/models/event.server.model.js');
 
-console.log('here');
 User.count({
     'username': 'AAA'
 }, function(err, exists) {
