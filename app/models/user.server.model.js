@@ -91,7 +91,11 @@ var UserSchema = new Schema({
         type: Number,
         default: 0,
     },
-    translation: {
+    translating: {
+        type: String,
+        default: '',
+    },
+    notes: {
         type: String,
         default: '',
     },

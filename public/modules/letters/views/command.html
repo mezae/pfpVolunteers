@@ -55,7 +55,7 @@
 			<div class="form-group">
 				<div class="input-group">
 					<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-					<input type="search" class="form-control" ng-model="query.first_name" placeholder="Search by Name"/>
+					<input type="search" class="form-control" ng-model="query.first_name" placeholder="Search by First Name"/>
 				</div>
 			</div>
 		</div>
@@ -104,7 +104,7 @@
 				<div class="text-center" ng-show="!partner.submitted">
 					<strong>{{partner.username}}</strong>
 				</div>
-				<div class="text-center" ng-show="partner.submitted">
+				<div class="text-center crop" ng-show="partner.submitted">
 					<strong>{{partner.last_name | uppercase}}, {{partner.first_name}}</strong>
 				</div>
 

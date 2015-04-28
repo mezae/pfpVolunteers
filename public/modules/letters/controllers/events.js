@@ -9,20 +9,29 @@ angular.module('letters').controller('EventsController', ['$scope', '$stateParam
 
         $scope.adminView = $scope.user.role === 'admin';
 
+        var allUsers = null;
+        $scope.calculateHours = function() {
+            $scope.eventTotal = 0;
+            for (var i = 0; i < $scope.currentEvent.volunteers.length; i++) {
+                $scope.eventTotal += $scope.currentEvent.volunteers[i].hours;
+            }
+        };
+
         //Helps initialize page by finding the appropriate letters
         $scope.find = function() {
             Agencies.query({}, function(users) {
+                allUsers = users;
                 $scope.users = _.filter(users, function(u) {
-                    return u.name !== '' && u.role !== 'admin';
+                    return u.first_name !== '' && u.role !== 'admin';
                 });
-
-                socket.syncUpdates('users', $scope.users);
+                socket.syncUpdates('users', allUsers);
             });
 
             Events.get({
                 eventId: $stateParams.eventId
             }, function(event) {
                 $scope.currentEvent = event;
+                $scope.calculateHours();
             });
         };
 
@@ -37,32 +46,42 @@ angular.module('letters').controller('EventsController', ['$scope', '$stateParam
 
         $scope.save = function() {
             $scope.volProfile = $scope.users[$scope.volProfile];
-            $scope.volProfile.hours = $scope.newVol.hours;
+            $scope.volProfile.hours += $scope.newVol.hours;
             $scope.newVol.name = $scope.volProfile.first_name + ' ' + $scope.volProfile.last_name;
             $scope.currentEvent.volunteers.push($scope.newVol);
-            $scope.users = _.filter($scope.users, function(u) {
-                return u.name !== $scope.newVol.name;
+            $scope.users = _.filter($scope.users, function(user) {
+                return user.first_name + ' ' + user.last_name !== $scope.newVol.name;
             });
 
             Events.update($scope.currentEvent, function(response) {
                 $scope.newVol = null;
                 $scope.newVolunteer = false;
                 $scope.currentEvent = response;
+                $scope.calculateHours();
 
                 Agencies.update($scope.volProfile, function(response) {
                     $scope.volProfile = null;
-                })
+                });
             });
         };
 
         $scope.deleteVolunteer = function(index) {
-            $scope.currentEvent.volunteers.splice(index, 1);
-            Events.update($scope.currentEvent, function(response) {
-                $scope.newVol = null;
-                $scope.newVolunteer = false;
-                $scope.currentEvent = response;
+            var oldVol = $scope.currentEvent.volunteers.splice(index, 1);
+            var newVol = _.find(allUsers, function(users) {
+                return users.first_name + ' ' + users.last_name === oldVol[0].name;
             });
-        }
+
+            Events.update($scope.currentEvent, function(response) {
+                newVol.hours -= oldVol[0].hours;
+                $scope.currentEvent = response;
+                $scope.calculateHours();
+
+                Agencies.update(newVol, function(response) {
+                    $scope.users.push(response);
+                });
+
+            });
+        };
 
         //Helps clean up sloppy user input
         function cleanText(text, priority) {

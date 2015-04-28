@@ -1,8 +1,8 @@
 'use strict';
 /* global _: false */
 
-angular.module('letters').controller('myController', ['$scope', '$window', '$modal', '$location', '$filter', '$http', 'Authentication', 'Users', 'Articles',
-    function($scope, $window, $modal, $location, $filter, $http, Authentication, Users, Articles) {
+angular.module('letters').controller('myController', ['$scope', '$window', '$modal', '$location', '$filter', '$http', 'Authentication', 'Users', 'Events',
+    function($scope, $window, $modal, $location, $filter, $http, Authentication, Users, Events) {
         $scope.user = Authentication.user;
         if (!$scope.user) $location.path('/').replace();
 
@@ -33,7 +33,7 @@ angular.module('letters').controller('myController', ['$scope', '$window', '$mod
                     var headers = ['track', 'type', 'name', 'age', 'gender', 'gift'];
                     headers.push('flagged');
                     var csvString = headers.join(',') + '\r\n';
-                    var Recipients = Articles.query({
+                    var Recipients = Events.query({
                         start: $scope.startDate,
                         end: $scope.endDate
                     }, function() {

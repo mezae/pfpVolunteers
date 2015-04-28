@@ -337,51 +337,115 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                 var content = file.target.result;
                 var rows = content.split(/[\r\n|\n]+/);
                 var headers = rows.shift();
-                var required_fields = ['Agency Code', 'Agency Name', 'Contact Name', 'Contact E-mail', 'Accepted Children', 'Accepted Teens', 'Accepted Seniors'];
-                var missing_fields = [];
 
-                _.forEach(required_fields, function(field) {
-                    if (!_.includes(headers, field)) {
-                        missing_fields.push(field);
-                    }
-                });
+                if ($scope.radioModel === 'users') {
+                    var required_fields = ['First Name', 'Last Name', 'Cont.', 'Email', 'Emergency Contact Phone', 'Translating', 'Notes', 'Total hours'];
+                    var missing_fields = [];
 
-                if (missing_fields.length) {
-                    $scope.alert = {
-                        active: true,
-                        type: 'danger',
-                        msg: 'Your csv file could not be uploaded. It is missing the following columns: ' + missing_fields.join(', ') + '.'
-                    };
-                } else {
-                    headers = headers.split(',');
-                    var code_col = headers.indexOf('Agency Code');
-                    var agency_col = headers.indexOf('Agency Name');
-                    var contact_col = headers.indexOf('Contact Name');
-                    var email_col = headers.indexOf('Contact E-mail');
-                    var child_col = headers.indexOf('Accepted Children');
-                    var teen_col = headers.indexOf('Accepted Teens');
-                    var seniors_col = headers.indexOf('Accepted Seniors');
-
-                    _.forEach(rows, function(row) {
-                        var record = row.split(',');
-                        if (!_.includes($scope.partners, record[code_col])) {
-                            var newPartner = {
-                                username: record[code_col],
-                                agency: record[agency_col],
-                                contact: record[contact_col],
-                                email: record[email_col],
-                                children: parseInt(record[child_col], 10),
-                                teens: parseInt(record[teen_col], 10),
-                                seniors: parseInt(record[seniors_col], 10)
-                            };
-                            signup(newPartner);
+                    _.forEach(required_fields, function(field) {
+                        if (!_.includes(headers, field)) {
+                            missing_fields.push(field);
                         }
                     });
-                    $scope.alert = {
-                        active: true,
-                        type: 'success',
-                        msg: 'Your csv file was uploaded successfully.'
-                    };
+
+                    if (missing_fields.length) {
+                        $scope.alert = {
+                            active: true,
+                            type: 'danger',
+                            msg: 'Your csv file could not be uploaded. It is missing the following columns: ' + missing_fields.join(', ') + '.'
+                        };
+                    } else {
+                        headers = headers.split(',');
+                        var fname_col = headers.indexOf('First Name');
+                        var lname_col = headers.indexOf('Last Name');
+                        var cont_col = headers.indexOf('Cont.');
+                        var email_col = headers.indexOf('Email');
+                        var emphone_col = headers.indexOf('Emergency Contact Phone');
+                        var trans_col = headers.indexOf('Translating');
+                        var notes_col = headers.indexOf('Notes');
+                        var hours_col = headers.indexOf('Total hours');
+
+                        _.forEach(rows, function(row) {
+                            var record = row.split(',');
+                            if (!_.includes($scope.partners, record[email_col])) {
+                                var newPartner = {
+                                    username: record[email_col],
+                                    first_name: record[fname_col],
+                                    last_name: record[lname_col],
+                                    contingent: record[cont_col],
+                                    email: record[email_col],
+                                    emergency_phone: record[emphone_col],
+                                    translating: record[trans_col],
+                                    notes: record[notes_col],
+                                    hours: parseFloat(record[hours_col], 10),
+                                    submitted: true
+                                };
+                                signup(newPartner);
+                            }
+                        });
+                        $scope.alert = {
+                            active: true,
+                            type: 'success',
+                            msg: 'Your csv file was uploaded successfully.'
+                        };
+                    }
+                } else {
+
+                    var required_fields = ['First Name', 'Last Name', 'Email', 'Total hours'];
+                    var missing_fields = [];
+
+                    _.forEach(required_fields, function(field) {
+                        if (!_.includes(headers, field)) {
+                            missing_fields.push(field);
+                        }
+                    });
+
+                    if (missing_fields.length) {
+                        $scope.alert = {
+                            active: true,
+                            type: 'danger',
+                            msg: 'Your csv file could not be uploaded. It is missing the following columns: ' + missing_fields.join(', ') + '.'
+                        };
+                    } else {
+                        headers = headers.split(',');
+                        var fname_col = headers.indexOf('First Name');
+                        var lname_col = headers.indexOf('Last Name');
+                        var email_col = headers.indexOf('Email');
+                        var hours_col = headers.indexOf('Total hours');
+
+
+
+                        for (var i = 0; i < rows.length; i++) {
+                            rows[i] = rows[i].split(',');
+                        }
+
+                        var first_event = hours_col + 1;
+                        var last_event = headers.length - 1;
+                        for (var e = first_event; e <= last_event; e++) {
+                            $scope.event = {
+                                date: null,
+                                volunteers: []
+                            };
+                            $scope.event.date = headers[e];
+                            for (var user = 0; user < rows.length; user++) {
+                                var yourHours = parseFloat(rows[user][e], 10);
+                                if (yourHours > 0) {
+                                    $scope.event.volunteers.push({
+                                        name: rows[user][fname_col] + ' ' + rows[user][lname_col],
+                                        hours: yourHours
+                                    });
+                                }
+                            }
+                            $scope.save();
+                        }
+
+                        $scope.alert = {
+                            active: true,
+                            type: 'success',
+                            msg: 'Your csv file was uploaded successfully.'
+                        };
+                    }
+
                 }
             };
             reader.readAsText(file);
@@ -541,20 +605,29 @@ angular.module('letters').controller('EventsController', ['$scope', '$stateParam
 
         $scope.adminView = $scope.user.role === 'admin';
 
+        var allUsers = null;
+        $scope.calculateHours = function() {
+            $scope.eventTotal = 0;
+            for (var i = 0; i < $scope.currentEvent.volunteers.length; i++) {
+                $scope.eventTotal += $scope.currentEvent.volunteers[i].hours;
+            }
+        };
+
         //Helps initialize page by finding the appropriate letters
         $scope.find = function() {
             Agencies.query({}, function(users) {
+                allUsers = users;
                 $scope.users = _.filter(users, function(u) {
-                    return u.name !== '' && u.role !== 'admin';
+                    return u.first_name !== '' && u.role !== 'admin';
                 });
-
-                socket.syncUpdates('users', $scope.users);
+                socket.syncUpdates('users', allUsers);
             });
 
             Events.get({
                 eventId: $stateParams.eventId
             }, function(event) {
                 $scope.currentEvent = event;
+                $scope.calculateHours();
             });
         };
 
@@ -569,32 +642,42 @@ angular.module('letters').controller('EventsController', ['$scope', '$stateParam
 
         $scope.save = function() {
             $scope.volProfile = $scope.users[$scope.volProfile];
-            $scope.volProfile.hours = $scope.newVol.hours;
+            $scope.volProfile.hours += $scope.newVol.hours;
             $scope.newVol.name = $scope.volProfile.first_name + ' ' + $scope.volProfile.last_name;
             $scope.currentEvent.volunteers.push($scope.newVol);
-            $scope.users = _.filter($scope.users, function(u) {
-                return u.name !== $scope.newVol.name;
+            $scope.users = _.filter($scope.users, function(user) {
+                return user.first_name + ' ' + user.last_name !== $scope.newVol.name;
             });
 
             Events.update($scope.currentEvent, function(response) {
                 $scope.newVol = null;
                 $scope.newVolunteer = false;
                 $scope.currentEvent = response;
+                $scope.calculateHours();
 
                 Agencies.update($scope.volProfile, function(response) {
                     $scope.volProfile = null;
-                })
+                });
             });
         };
 
         $scope.deleteVolunteer = function(index) {
-            $scope.currentEvent.volunteers.splice(index, 1);
-            Events.update($scope.currentEvent, function(response) {
-                $scope.newVol = null;
-                $scope.newVolunteer = false;
-                $scope.currentEvent = response;
+            var oldVol = $scope.currentEvent.volunteers.splice(index, 1);
+            var newVol = _.find(allUsers, function(users) {
+                return users.first_name + ' ' + users.last_name === oldVol[0].name;
             });
-        }
+
+            Events.update($scope.currentEvent, function(response) {
+                newVol.hours -= oldVol[0].hours;
+                $scope.currentEvent = response;
+                $scope.calculateHours();
+
+                Agencies.update(newVol, function(response) {
+                    $scope.users.push(response);
+                });
+
+            });
+        };
 
         //Helps clean up sloppy user input
         function cleanText(text, priority) {
@@ -618,8 +701,8 @@ angular.module('letters').controller('EventsController', ['$scope', '$stateParam
 'use strict';
 /* global _: false */
 
-angular.module('letters').controller('myController', ['$scope', '$window', '$modal', '$location', '$filter', '$http', 'Authentication', 'Users', 'Articles',
-    function($scope, $window, $modal, $location, $filter, $http, Authentication, Users, Articles) {
+angular.module('letters').controller('myController', ['$scope', '$window', '$modal', '$location', '$filter', '$http', 'Authentication', 'Users', 'Events',
+    function($scope, $window, $modal, $location, $filter, $http, Authentication, Users, Events) {
         $scope.user = Authentication.user;
         if (!$scope.user) $location.path('/').replace();
 
@@ -650,7 +733,7 @@ angular.module('letters').controller('myController', ['$scope', '$window', '$mod
                     var headers = ['track', 'type', 'name', 'age', 'gender', 'gift'];
                     headers.push('flagged');
                     var csvString = headers.join(',') + '\r\n';
-                    var Recipients = Articles.query({
+                    var Recipients = Events.query({
                         start: $scope.startDate,
                         end: $scope.endDate
                     }, function() {
@@ -1456,6 +1539,8 @@ angular.module('users').controller('SettingsController', ['$scope', '$http', '$l
         });
 
         $scope.radioModel = 'users';
+
+
 
         // Update a user profile
         $scope.updateUserProfile = function(isValid) {

@@ -75,14 +75,14 @@
 }
 
 .btn-login {
-  color: #cd4d52;
-  border-color: #cd4d52;
+  color: #9C182F;
+  border-color: #9C182F;
 }
 
 .btn-login:hover, .btn-login:focus {
   text-decoration: none;
-  background-color: white;
-  border: 1px solid #85c739;
-  color: #85c739;
+  color: white;
+  background-color: #9C182F;
+  border: 1px solid #9C182F;
 }
 

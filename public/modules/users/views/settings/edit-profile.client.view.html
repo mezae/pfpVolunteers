@@ -22,7 +22,7 @@
 
 				<div class="form-group">
 
-					<label for="contact" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Name</label>
+					<label for="contact" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">First Name</label>
 					<div class="col-sm-9">
 						<input type="text" id="contact" name="contact" class="profile form-control" data-ng-model="currentUser.first_name" placeholder="first name" required>
 					</div>
@@ -31,7 +31,7 @@
 
 				<div class="form-group">
 
-					<label for="contact" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Name</label>
+					<label for="contact" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Last Name</label>
 					<div class="col-sm-9">
 						<input type="text" id="contact" name="contact" class="profile form-control" data-ng-model="currentUser.last_name" placeholder="last name" required>
 					</div>
@@ -138,6 +138,42 @@
 					</div>
 				</div>
 
+				<div class="form-group">
+
+					<label for="translating" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Translation Assistance</label>
+					<div class="col-sm-9">
+						<input type="text" id="translating" name="translating" class="profile form-control" data-ng-model="currentUser.translating" placeholder="translation assistance" required>
+					</div> 
+
+				</div> 
+
+				<div class="form-group">
+
+					<label for="emer_name" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Emergency Contact Name</label>
+					<div class="col-sm-9">
+						<input type="text" id="emer_name" name="emer_name" class="profile form-control" data-ng-model="currentUser.emergency_name" placeholder="emergency contact name" required>
+					</div> 
+
+				</div> 
+
+				<div class="form-group">
+
+					<label for="emer_phone" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Emergency Phone</label>
+					<div class="col-sm-9">
+						<input type="text" id="emer_phone" name="emer_phone" class="profile form-control" data-ng-model="currentUser.emergency_phone" placeholder="emergency phone" required>
+					</div> 
+
+				</div> 
+
+				<div class="form-group">
+
+					<label for="notes" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Notes</label>
+					<div class="col-sm-9">
+						<textarea id="notes" name="notes" class="profile form-control" data-ng-model="currentUser.notes" placeholder="notes" required></textarea>
+					</div> 
+
+				</div> 
+
 				<div class="text-center form-group">
 					<button type="submit" class="btn btn-large btn-success" ng-show="user.role === 'admin'">Save Changes</button>
 					<button type="submit" class="btn btn-large btn-success" ng-hide="user.role === 'admin'">Submit</button>
@@ -158,6 +194,10 @@
 			<tr ng-repeat="event in relatedEvents | orderBy: 'date'">
 				<td>{{event.date}}</td>
 				<td>{{event.volunteers.hours}}</td>
+			</tr>
+			<tr>
+				<td><strong>Total</strong></td>
+				<td>{{currentUser.hours}}</td>
 			</tr>
 		</table>
 

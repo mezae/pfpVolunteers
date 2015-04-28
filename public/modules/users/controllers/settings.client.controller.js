@@ -29,6 +29,8 @@ angular.module('users').controller('SettingsController', ['$scope', '$http', '$l
 
         $scope.radioModel = 'users';
 
+
+
         // Update a user profile
         $scope.updateUserProfile = function(isValid) {
             if (isValid) {

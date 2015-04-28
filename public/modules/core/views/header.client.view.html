@@ -1,7 +1,7 @@
 <div class="container" data-ng-controller="HeaderController">
 
 	<div class="navbar-header">
-		<button class="navbar-toggle btn btn-lg btn-link" ng-hide="!authentication.user" type="button" data-ng-click="toggleCollapsibleMenu()">
+		<button class="navbar-toggle btn-lg" ng-hide="!authentication.user" type="button" data-ng-click="toggleCollapsibleMenu()">
 			<span class="sr-only">Toggle navigation</span>
 			<i class="glyphicon glyphicon-menu-hamburger"></i>
 		</button>
@@ -13,27 +13,27 @@
 		<ul class="nav navbar-nav navbar-right">
 			<li class="dropdown" dropdown on-toggle="toggled(open)" ng-class="{open: hover}" ng-mouseenter="hover = true" ng-mouseleave="hover = false" ng-show="authentication.user">
 				<a href class="dropdown-toggle" dropdown-toggle>
-					<span data-ng-bind="authentication.user.agency"></span> <b class="caret"></b>
+					<span data-ng-bind="authentication.user.username"></span> <b class="caret"></b>
 				</a>
 				<ul class="dropdown-menu" role="menu">
-					<li>
+<!-- 					<li>
 						<a href="" ng-click="showTutorial()">
 							<i class="glyphicon glyphicon-question-sign"></i>  Tutorial
 						</a>
-					</li>
-					<li data-ng-show="authentication.user.role === 'admin'">
+					</li> -->
+<!-- 					<li data-ng-show="authentication.user.role === 'admin'">
 						<a href="/#!/admin/email">
 							<i class="glyphicon glyphicon-envelope"></i>  E-mail Templates
 						</a>
-					</li>
-					<li>
-						<a href="/#!/settings/profile/edit">
-							<i class="glyphicon glyphicon-user"></i>  Edit Profile
-						</a>
-					</li>
+					</li> -->
 					<li>
 						<a href="/#!/settings/password">
 							<i class="glyphicon glyphicon-lock"></i>  Change Password
+						</a>
+					</li>
+					<li data-ng-show="authentication.user.role === 'admin'">
+						<a href="/#!/admin/settings">
+							<i class="glyphicon glyphicon-cog"></i>  Settings
 						</a>
 					</li>
 					<li class="divider"></li>

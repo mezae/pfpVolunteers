@@ -109,3 +109,14 @@ a.btn-ready, a.btn-review, a.btn-complete, a.btn-started, a.btn-empty {
   opacity: 1;
   cursor: default;
 }
+
+.table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
+  line-height: 30px;
+}
+
+.crop {
+  width: auto;
+  overflow: hidden;
+  height: 20px;
+  line-height: 20px;
+}
