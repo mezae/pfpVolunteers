@@ -1,14 +1,15 @@
 <section class="row" data-ng-controller="SettingsController">
 
-	
-
 	<div class="col-md-12">
 
 	<h3 class="text-center" ng-hide="user.role === 'admin'">Admissions Committee Contact Form</h3>
+
+	<p class="text-center em-center col-md-9" ng-hide="user.role === 'admin'">The Student Admissions Committee assists the Admissions staff in conducting certain critical aspects of the admissions process which include Parent Meetings and First Level Testing. All members have the responsibility of completing specific assignments assigned by the Admissions staff during those allotted times. The dates for these events are on Saturdays and a few on holiday breaks. We do not ask the Admissions Committee to come in during the school week.</p>
+
 	<h3 class="text-center" ng-show="user.role === 'admin' && radioModel === 'users'">Contact Information</h3>
 	<h3 class="text-center" ng-show="user.role === 'admin' && radioModel === 'events'">Volunteer Summary</h3>
 
-	<div class="btn-group pull-right">
+	<div class="btn-group pull-right" ng-show="user.role === 'admin'">
 		<label class="btn btn-radio" ng-model="radioModel" btn-radio="'users'"><i class="glyphicon glyphicon-user"></i></label>
 		<label class="btn btn-radio" ng-model="radioModel" btn-radio="'events'"><i class="glyphicon glyphicon-calendar"></i></label>
 	</div>
@@ -17,173 +18,148 @@
 
 	<div class="col-xs-offset-2 col-xs-8 col-md-offset-4 col-md-4">
 
-		<form name="userForm" data-ng-submit="updateUserProfile(userForm.$valid)" class="signin form-horizontal" autocomplete="off" ng-show="radioModel === 'users'">
+		<form name="userForm" data-ng-submit="updateUserProfile(userForm.$valid)" class="signin" autocomplete="off" ng-show="radioModel === 'users'">
 			<fieldset>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="contact" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">First Name</label>
-					<div class="col-sm-9">
-						<input type="text" id="contact" name="contact" class="profile form-control" data-ng-model="currentUser.first_name" placeholder="first name" required>
-					</div>
+					<label for="contact" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">First Name</label>
+					<input type="text" id="contact" name="contact" class="profile form-control" data-ng-model="currentUser.first_name" placeholder="first name" required>
 
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="contact" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Last Name</label>
-					<div class="col-sm-9">
+					<label for="contact" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Last Name</label>
 						<input type="text" id="contact" name="contact" class="profile form-control" data-ng-model="currentUser.last_name" placeholder="last name" required>
-					</div>
 
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="contingent" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Contingent</label>
-					<div class="col-sm-9">
+					<label for="contingent" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Contingent</label>
 						<input type="text" id="contingent" name="contingent" class="profile form-control" data-ng-model="currentUser.contingent" placeholder="contingent" required>
-					</div>
 
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="gender" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Gender</label>
-					<div class="col-sm-9">
+					<label for="gender" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Gender</label>
 						<input type="gender" id="gender" name="gender" class="profile form-control" data-ng-model="currentUser.gender" placeholder="gender" required>
-					</div>
 
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="school" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">School</label>
-					<div class="col-sm-9">
+					<label for="school" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">School</label>
 						<input type="text" id="school" name="school" class="profile form-control" data-ng-model="currentUser.school" placeholder="school" required>
-					</div>
 
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="grade" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Grade</label>
-					<div class="col-sm-9">
+					<label for="grade" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Grade</label>
 						<input type="text" id="grade" name="grade" class="profile form-control" data-ng-model="currentUser.grade" placeholder="grade" required>
-					</div>
 
 				</div>
 
-				<!-- 
-				<div class="form-group">
+				<div class="form-group col-md-12">
 
-					<label for="school" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">school</label>
-					<div class="col-sm-9">
-						<input type="text" id="school" name="school" class="profile form-control" data-ng-model="currentUser.school" placeholder="school" required>
-					</div> 
-
-				</div> 
-				-->
-
-				<div class="form-group">
-
-					<label for="email" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Email</label>
-					<div class="col-sm-9">
+					<label for="email" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Email</label>
 						<input type="email" id="email" name="email" class="profile form-control" data-ng-model="currentUser.email" placeholder="e-mail" required>
-					</div>
 
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="tel" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Phone</label>
-					<div class="col-sm-9">
+					<label for="tel" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Home</label>
 						<input type="tel" id="tel" name="tel" class="profile form-control" ui-mask="(999) 999-9999" data-ng-model="currentUser.phone" required>
-					</div>
 
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="tel" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Cell</label>
-					<div class="col-sm-9">
+					<label for="tel" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Cell</label>
 						<input type="tel" id="tel" name="tel" class="profile form-control" ui-mask="(999) 999-9999" data-ng-model="currentUser.cell" required>
-					</div>
 
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-12">
 
-					<label for="address" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Address</label>
-					<div class="col-sm-9">
+					<label for="address" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Address</label>
 						<input type="text" id="address" name="address" class="profile form-control" data-ng-model="currentUser.address" placeholder="mailing address" required>
-					</div>
 
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="city" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">City</label>
-					<div class="col-sm-9">
+					<label for="city" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">City</label>
 						<input type="text" id="city" name="city" class="profile form-control" data-ng-model="currentUser.city" placeholder="city" required>
-					</div>
 
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="zip" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Zip Code</label>
-					<div class="col-sm-9">
+					<label for="zip" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Zip Code</label>
 						<input type="number" id="zip" name="zip" class="profile form-control" data-ng-model="currentUser.zip" placeholder="zip code" required>
-					</div>
 				</div>
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="translating" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Translation Assistance</label>
-					<div class="col-sm-9">
-						<input type="text" id="translating" name="translating" class="profile form-control" data-ng-model="currentUser.translating" placeholder="translation assistance" required>
-					</div> 
+					<label for="emer_name" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Emergency Contact</label>
+						<input type="text" id="emer_name" name="emer_name" class="profile form-control" data-ng-model="currentUser.emergency_name" placeholder="emergency contact" required> 
 
 				</div> 
 
-				<div class="form-group">
+				<div class="form-group col-md-6">
 
-					<label for="emer_name" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Emergency Contact Name</label>
-					<div class="col-sm-9">
-						<input type="text" id="emer_name" name="emer_name" class="profile form-control" data-ng-model="currentUser.emergency_name" placeholder="emergency contact name" required>
-					</div> 
+					<label for="emer_phone" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Emergency Phone</label>
+						<input type="text" id="emer_phone" name="emer_phone" class="profile form-control" data-ng-model="currentUser.emergency_phone" placeholder="emergency phone" required> 
+
+				</div>
+
+				<div class="checkbox col-md-12">
+					I'm interested in helping in the following ways: </br>
+					<label>
+					<input type="checkbox"> Proctoring testing sessions
+					</label>
+				</div>
+
+				<div class="checkbox col-md-12">
+					<label>
+					<input type="checkbox"> Assembling Admissions materials such as mailings, school packets & parent folders
+					</label>
+				</div>
+
+				<div class="checkbox col-md-12">
+					<label>
+					<input type="checkbox"> Assistance during Parent Meetings (i.e. lights, collecting applications, speaking to parents)
+					</label>
+				</div>
+
+				<div class="form-group col-md-12">
+
+					<label for="translating" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Translation Assistance</label>
+						<input type="text" id="translating" name="translating" class="profile form-control" data-ng-model="currentUser.translating" placeholder="translation assistance" required> 
 
 				</div> 
 
-				<div class="form-group">
+				<div class="form-group col-md-12">
 
-					<label for="emer_phone" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Emergency Phone</label>
-					<div class="col-sm-9">
-						<input type="text" id="emer_phone" name="emer_phone" class="profile form-control" data-ng-model="currentUser.emergency_phone" placeholder="emergency phone" required>
-					</div> 
+					<label for="notes" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Notes</label>
+						<textarea id="notes" name="notes" class="profile form-control" data-ng-model="currentUser.notes" placeholder="notes" required></textarea> 
 
 				</div> 
 
-				<div class="form-group">
-
-					<label for="notes" class="col-sm-3 control-label" ng-class="{'sr-only': user.role !== 'admin'}">Notes</label>
-					<div class="col-sm-9">
-						<textarea id="notes" name="notes" class="profile form-control" data-ng-model="currentUser.notes" placeholder="notes" required></textarea>
-					</div> 
-
-				</div> 
-
+			</fieldset>
 				<div class="text-center form-group">
-					<button type="submit" class="btn btn-large btn-success" ng-show="user.role === 'admin'">Save Changes</button>
-					<button type="submit" class="btn btn-large btn-success" ng-hide="user.role === 'admin'">Submit</button>
+					<button type="submit" class="btn btn-large btn-login" ng-show="user.role === 'admin'">Save Changes</button>
+					<button type="submit" class="btn btn-large btn-login" ng-hide="user.role === 'admin'">Submit</button>
 				</div>
 
 				<div data-ng-show="error" class="text-center text-danger">
 					<strong data-ng-bind="error"></strong>
 				</div>
-
-			</fieldset>
 		</form>
 
 		<table class="table table-striped" ng-show="radioModel === 'events'">

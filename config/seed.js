@@ -9,7 +9,7 @@ var User = require('../app/models/user.server.model.js');
 var Event = require('../app/models/event.server.model.js');
 
 User.count({
-    'username': 'AAA'
+    'role': 'admin'
 }, function(err, exists) {
     if (!exists) {
         User.create({

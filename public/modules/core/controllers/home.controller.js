@@ -5,10 +5,10 @@ angular.module('core').controller('HomeController', ['$scope', '$location', 'Aut
         $scope.user = Authentication.user;
 
         function redirect(user) {
-            if (user.username === 'AAA') {
+            if (user.role === 'admin') {
                 $location.path('/admin');
             } else {
-                $location.path('/agency/' + user.username);
+                $location.path('/user/' + user._id);
             }
         }
 
