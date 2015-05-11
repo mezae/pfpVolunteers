@@ -533,6 +533,16 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
             });
         };
 
+        $scope.open = function($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+            $scope.opened = true;
+        };
+
+        $scope.dateOptions = {
+            showWeeks: false
+        };
+
     }
 ]);
 'use strict';
@@ -615,8 +625,8 @@ angular.module('letters')
 'use strict';
 /* global _: false */
 
-angular.module('letters').controller('EventsController', ['$scope', '$stateParams', '$location', '$filter', '$timeout', 'Authentication', 'Events', 'Agencies', 'Users', 'socket',
-    function($scope, $stateParams, $location, $filter, $timeout, Authentication, Events, Agencies, Users, socket) {
+angular.module('letters').controller('EventsController', ['$scope', '$window', '$stateParams', '$location', '$filter', '$timeout', 'Authentication', 'Events', 'Agencies', 'Users', 'socket',
+    function($scope, $window, $stateParams, $location, $filter, $timeout, Authentication, Events, Agencies, Users, socket) {
         $scope.user = Authentication.user;
 
         if (!$scope.user) $location.path('/');
@@ -649,8 +659,36 @@ angular.module('letters').controller('EventsController', ['$scope', '$stateParam
             });
         };
 
+        $scope.rememberOldVol = function(volunteer) {
+            $scope.currentEdit = volunteer;
+            $scope.oldVol = {
+                name: volunteer.name,
+                hours: volunteer.hours
+            };
+        };
+
+        $scope.updateVolunteer = function(volunteer) {
+            var hourDifference = volunteer.hours - $scope.oldVol.hours;
+
+            if (hourDifference !== 0) {
+                var newVol = _.filter($scope.users, function(user) {
+                    return user.first_name + ' ' + user.last_name === volunteer.name;
+                })[0];
+
+                Events.update($scope.currentEvent, function(response) {
+                    newVol.hours += hourDifference;
+                    $scope.currentEvent = response;
+                    $scope.calculateHours();
+
+                    Agencies.update(newVol);
+                });
+            }
+            $scope.currentEdit = null;
+        };
+
         $scope.addVolunteer = function() {
             $scope.newVolunteer = true;
+            $scope.currentEdit = null;
         };
 
         $scope.cancel = function() {
@@ -663,9 +701,6 @@ angular.module('letters').controller('EventsController', ['$scope', '$stateParam
             $scope.volProfile.hours += $scope.newVol.hours;
             $scope.newVol.name = $scope.volProfile.first_name + ' ' + $scope.volProfile.last_name;
             $scope.currentEvent.volunteers.push($scope.newVol);
-            $scope.users = _.filter($scope.users, function(user) {
-                return user.first_name + ' ' + user.last_name !== $scope.newVol.name;
-            });
 
             Events.update($scope.currentEvent, function(response) {
                 $scope.newVol = null;
@@ -680,21 +715,24 @@ angular.module('letters').controller('EventsController', ['$scope', '$stateParam
         };
 
         $scope.deleteVolunteer = function(index) {
-            var oldVol = $scope.currentEvent.volunteers.splice(index, 1);
-            var newVol = _.find(allUsers, function(users) {
-                return users.first_name + ' ' + users.last_name === oldVol[0].name;
-            });
-
-            Events.update($scope.currentEvent, function(response) {
-                newVol.hours -= oldVol[0].hours;
-                $scope.currentEvent = response;
-                $scope.calculateHours();
-
-                Agencies.update(newVol, function(response) {
-                    $scope.users.push(response);
+            var confirmation = $window.prompt('Please type DELETE to remove ' + $scope.currentEdit.name + '.');
+            if (confirmation === 'DELETE') {
+                var oldVol = $scope.currentEvent.volunteers.splice(index, 1);
+                var newVol = _.find(allUsers, function(users) {
+                    return users.first_name + ' ' + users.last_name === oldVol[0].name;
                 });
 
-            });
+                Events.update($scope.currentEvent, function(response) {
+                    newVol.hours -= oldVol[0].hours;
+                    $scope.currentEvent = response;
+                    $scope.calculateHours();
+
+                    Agencies.update(newVol, function(response) {
+                        $scope.users.push(response);
+                    });
+
+                });
+            }
         };
 
         //Helps clean up sloppy user input

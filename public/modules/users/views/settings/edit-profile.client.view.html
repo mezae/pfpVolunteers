@@ -168,7 +168,7 @@
 				<th># of Hours</th>
 			</tr>
 			<tr ng-repeat="event in relatedEvents | orderBy: 'date'">
-				<td>{{event.date}}</td>
+				<td><a href="/#!/admin/event/{{event._id}}" class="btn-link">{{event.date | date: 'shortDate'}}</a></td>
 				<td>{{event.volunteers.hours}}</td>
 			</tr>
 			<tr>

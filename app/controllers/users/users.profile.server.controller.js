@@ -25,7 +25,7 @@ exports.topdf = function(req, res) {
             left: '1in'
         }
     };
-
+    console.log(req.headers.host);
     res.render('templates/pfp-letter', {
         today: (new Date()).toDateString().substring(3),
         firstName: user.first_name,

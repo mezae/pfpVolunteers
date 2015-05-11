@@ -1,6 +1,6 @@
 <section class="row" data-ng-controller="EventsController" ng-init="find()">
 
-	<h3 class="col-md-12 text-center">Event - {{currentEvent.date}}</h3>
+	<h3 class="col-md-12 text-center">{{currentEvent.date | date: 'mediumDate'}}</h3>
 
 	<div class="col-xs-offset-2 col-xs-8 col-md-offset-4 col-md-4">
 
