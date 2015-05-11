@@ -34,9 +34,10 @@
 
 			<form role="form">
 				<div class="form-group">
-					<label>Contact Info</label>
+					<label>{{radioModel === 'users' ? 'Contact' : 'Event' }} Info</label>
 					<input type="text" class="profile form-control" ng-model="partner.username" placeholder="username" ng-show="radioModel === 'users'">
 					<input type="text" class="profile form-control" ng-model="event.date" placeholder="event date" ng-show="radioModel === 'events'">
+					<input type="text" class="profile form-control" ng-model="event.shift" placeholder="event shift (optional)" ng-show="radioModel === 'events'">
 				</div>
 
 				<input type="button" class="btn btn-empty col-md-4 col-sm-3 col-xs-3 pull-left" ng-click="hideSidebar()" value="Cancel">
@@ -57,6 +58,7 @@
 					<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
 					<input type="search" class="form-control" ng-model="query.first_name" ng-show="radioModel === 'users'" placeholder="Search by First Name"/>
 					<input type="search" class="form-control" ng-model="query.date" ng-show="radioModel === 'events'" placeholder="Search by date"/>
+	<!-- 				<input type="search" class="form-control" ng-model="radioModel === 'users' ? query.first_name : query.date" placeholder="Search by {{radioModel === 'users' ? 'First Name' : 'date'}}"/> -->
 				</div>
 			</div>
 		</div>
@@ -114,6 +116,8 @@
 				<div class="text-center" ng-if="turn">
 					<a href="/#!/admin/user/{{partner._id}}" class="btn btn-link agency-btn"><i class="glyphicon glyphicon-eye-open"></i></a>
 
+					<button type="button" class="btn btn-link agency-mid" ng-click="writeServiceLetter(partner._id)"><i class="glyphicon glyphicon-file"></i></button>
+
 					<button type="button" class="btn btn-link agency-btn" ng-click="deleteBox(partner)"><i class="glyphicon glyphicon-trash"></i></button>
 				</div>
 
@@ -121,17 +125,19 @@
 		</div>
 
 		<!-- Event View -->
-		<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="event in events | orderBy: 'date' | filter:query as results" ng-show="radioModel === 'events'">
+		<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="event in events | orderBy: '-date' | filter:query as results" ng-show="radioModel === 'events'">
 			<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false">
 				
 				<div class="text-center">
-					<strong>{{event.date}}</strong>
+					<strong>{{event.date | date: 'shortDate'}} {{event.shift ? '(' +event.shift + ')' : ''}}</strong>
 				</div>
 
 				<p class="text-center" ng-show="!turn">{{event.volunteers.length}} Volunteers</p>
 
 				<div class="text-center" ng-if="turn">
 					<a href="/#!/admin/event/{{event._id}}" class="btn btn-link agency-btn"><i class="glyphicon glyphicon-eye-open"></i></a>
+
+					<button type="button" class="btn btn-link agency-mid" ng-click="showSidebar(event)"><i class="glyphicon glyphicon-pencil"></i></button>
 
 					<button type="button" class="btn btn-link agency-btn" ng-click="deleteBox(event)"><i class="glyphicon glyphicon-trash"></i></button>
 				</div>

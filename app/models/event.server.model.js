@@ -15,8 +15,12 @@ var EventSchema = new Schema({
         default: Date.now
     },
     date: {
-        type: String,
+        type: Date,
         default: ''
+    },
+    shift: {
+        type: String,
+        default: null
     },
     volunteers: {
         type: Array,

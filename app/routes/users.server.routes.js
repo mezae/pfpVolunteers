@@ -12,7 +12,7 @@ module.exports = function(app) {
     // Setting up the users profile api
     app.route('/users/me').get(users.me);
     app.route('/users').put(users.update);
-    app.route('/users/reset').get(users.reset);
+    app.route('/users/reset').get(users.resetData);
 
     app.route('/agency')
         .get(users.requiresLogin, users.list);
@@ -21,6 +21,9 @@ module.exports = function(app) {
         .get(users.requiresLogin, users.read)
         .put(users.update)
         .delete(users.delete);
+
+    app.route('/agency/:agencyId/pdf')
+        .get(users.requiresLogin, users.topdf);
 
     // Setting up the users password api
     app.route('/users/password').post(users.changePassword);

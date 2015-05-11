@@ -96,8 +96,8 @@ a.btn-ready, a.btn-review, a.btn-complete, a.btn-started, a.btn-empty {
 }
 
 .box-complete {
-  color: #9C182F;
-  border-color: #9C182F;
+  color: #656c65;
+  border-color: #C8D6AF;
 }
 
 .box-empty {

@@ -9,6 +9,40 @@ var _ = require('lodash'),
     passport = require('passport'),
     User = mongoose.model('User'),
     Event = mongoose.model('Event');
+var fs = require('fs');
+var pdf = require('html-pdf');
+
+exports.topdf = function(req, res) {
+    var user = req.user;
+
+    var options = {
+        filename: './pfpletter.pdf',
+        format: 'Letter',
+        border: {
+            top: '0.5in',
+            right: '1in',
+            bottom: '1in',
+            left: '1in'
+        }
+    };
+
+    res.render('templates/pfp-letter', {
+        today: (new Date()).toDateString().substring(3),
+        firstName: user.first_name,
+        lastName: user.last_name,
+        totalHours: user.hours,
+        hisher: user.gender === 'M' ? 'His' : 'Her',
+        himher: user.gender === 'M' ? 'him' : 'her',
+        heshe: user.gender === 'M' ? 'He' : 'She'
+
+    }, function(err, html) {
+        pdf.create(html, options).toFile(function(err, file) {
+            if (err) return console.log(err);
+            res.download(file.filename, 'file://' + file.filename);
+        });
+    });
+
+};
 
 //Allows admin access to all community partner accounts
 exports.list = function(req, res) {
@@ -109,7 +143,7 @@ exports.me = function(req, res) {
     res.json(req.user || null);
 };
 
-exports.reset = function(req, res) {
+exports.resetData = function(req, res) {
     var user = req.user;
     User.remove({
         'role': {

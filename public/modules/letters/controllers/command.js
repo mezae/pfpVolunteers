@@ -25,6 +25,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
         };
 
         $scope.find = function() {
+            $scope.query = '';
             Agencies.query({}, function(users) {
                 $scope.partners = users;
                 socket.syncUpdates('users', $scope.partners);
@@ -203,9 +204,14 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                     Agencies.update($scope.partner);
                 }
             } else {
-                Events.save($scope.event, function() {
-                    console.log('great!');
-                });
+                if ($scope.isNewAgency) {
+                    Events.save($scope.event, function() {
+                        console.log('great!');
+                    });
+
+                } else {
+                    Events.update($scope.event);
+                }
             }
             $scope.hideSidebar();
 
@@ -218,7 +224,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                 box_name = selected.username;
                 box_api = '/agency/';
             } else {
-                box_name = selected.date;
+                box_name = $filter('date')(selected.date, 'shortDate');
                 box_api = '/events/';
             }
 
@@ -231,7 +237,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
         //Show current state of partner that user wants to edit
         $scope.showSidebar = function(selected) {
             $scope.isNewAgency = selected ? false : true;
-            $scope.partner = selected;
+            $scope.event = selected;
             $scope.needToUpdate = true;
         };
 
@@ -243,6 +249,18 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
         $scope.$on('$destroy', function() {
             socket.unsyncUpdates('users');
         });
+
+        $scope.writeServiceLetter = function(student_id) {
+            $http.get('/agency/' + student_id + '/pdf', {
+                responseType: 'arraybuffer'
+            }).success(function(data) {
+                var file = new Blob([data], {
+                    type: 'application/pdf'
+                });
+                var fileURL = $window.URL.createObjectURL(file);
+                $window.open(fileURL);
+            });
+        };
 
     }
 ]);
