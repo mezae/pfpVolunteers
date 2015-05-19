@@ -395,6 +395,12 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                                 };
                                 signup(newPartner);
                                 allUsers.push(newPartner.first_name + ' ' + newPartner.last_name);
+                            } else {
+                                var updated_partner = _.filter($scope.partners, function(user) {
+                                    return (user.first_name.trim() + ' ' + user.last_name.trim()).trim() === (record[fname_col].trim() + ' ' + record[lname_col].trim()).trim();
+                                })[0];
+                                updated_partner.hours += parseFloat(record[hours_col], 10);
+                                Agencies.update(updated_partner);
                             }
                         });
                         $scope.alert = {
@@ -405,7 +411,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                     }
                 } else {
 
-                    var required_fields = ['First Name', 'Last Name', 'Email', 'Total hours'];
+                    var required_fields = ['First Name', 'Last Name', 'Total hours'];
                     var missing_fields = [];
 
                     _.forEach(required_fields, function(field) {
@@ -424,7 +430,6 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                         headers = headers.split(',');
                         var fname_col = headers.indexOf('First Name');
                         var lname_col = headers.indexOf('Last Name');
-                        var email_col = headers.indexOf('Email');
                         var hours_col = headers.indexOf('Total hours');
 
                         for (var i = 0; i < rows.length; i++) {
@@ -434,7 +439,6 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                         var first_event = hours_col + 1;
                         var last_event = headers.length - 1;
                         for (var e = first_event; e <= last_event; e++) {
-                            console.log(e);
                             $scope.event = {
                                 date: headers[e],
                                 volunteers: []
