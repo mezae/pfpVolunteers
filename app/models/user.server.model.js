@@ -81,11 +81,20 @@ var UserSchema = new Schema({
         type: String,
         default: '',
     },
+    emergency_phone2: {
+        type: String,
+        default: '',
+    },
     email: {
         type: String,
         trim: true,
         default: '',
         match: [/.+\@.+\..+/, 'Please fill a valid email address']
+    },
+    email2: {
+        type: String,
+        trim: true,
+        default: ''
     },
     hours: {
         type: Number,

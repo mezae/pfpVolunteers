@@ -69,7 +69,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                 var headers = rows.shift();
 
                 if ($scope.radioModel === 'users') {
-                    var required_fields = ['First Name', 'Last Name', 'Cont.', 'Email', 'Emergency Contact Phone', 'Translating', 'Notes', 'Total hours'];
+                    var required_fields = ['First Name', 'Last Name', 'Gender', 'Cont.', 'Email', 'Email2', 'Emergency Contact', 'Emergency Contact Phone', 'Emergency Phone 2', 'Translating', 'Notes', 'Total hours'];
                     var missing_fields = [];
 
                     _.forEach(required_fields, function(field) {
@@ -88,29 +88,42 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                         headers = headers.split(',');
                         var fname_col = headers.indexOf('First Name');
                         var lname_col = headers.indexOf('Last Name');
+                        var gender_col = headers.indexOf('Gender');
                         var cont_col = headers.indexOf('Cont.');
                         var email_col = headers.indexOf('Email');
+                        var email2_col = headers.indexOf('Email2');
+                        var emcontact_col = headers.indexOf('Emergency Contact');
                         var emphone_col = headers.indexOf('Emergency Contact Phone');
+                        var emphone2_col = headers.indexOf('Emergency Phone 2');
                         var trans_col = headers.indexOf('Translating');
                         var notes_col = headers.indexOf('Notes');
                         var hours_col = headers.indexOf('Total hours');
 
+                        var allUsers = _.map($scope.partners, function(users) {
+                            return (users.first_name.trim() + ' ' + users.last_name.trim()).trim();
+                        });
+
                         _.forEach(rows, function(row) {
                             var record = row.split(',');
-                            if (!_.includes($scope.partners, record[email_col])) {
+                            if (!_.includes(allUsers, (record[fname_col].trim() + ' ' + record[lname_col].trim()).trim())) {
                                 var newPartner = {
-                                    username: record[email_col],
-                                    first_name: record[fname_col],
-                                    last_name: record[lname_col],
+                                    username: record[email_col].trim(),
+                                    first_name: record[fname_col].trim(),
+                                    last_name: record[lname_col].trim(),
+                                    gender: record[gender_col],
                                     contingent: record[cont_col],
-                                    email: record[email_col],
-                                    emergency_phone: record[emphone_col],
-                                    translating: record[trans_col],
-                                    notes: record[notes_col],
+                                    email: record[email_col].trim(),
+                                    email2: record[email2_col].trim(),
+                                    emergency_contact: record[emcontact_col].trim(),
+                                    emergency_phone: record[emphone_col].trim(),
+                                    emergency_phone2: record[emphone2_col].trim(),
+                                    translating: record[trans_col].trim(),
+                                    notes: record[notes_col].trim(),
                                     hours: parseFloat(record[hours_col], 10),
                                     submitted: true
                                 };
                                 signup(newPartner);
+                                allUsers.push(newPartner.first_name + ' ' + newPartner.last_name);
                             }
                         });
                         $scope.alert = {
@@ -143,8 +156,6 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                         var email_col = headers.indexOf('Email');
                         var hours_col = headers.indexOf('Total hours');
 
-
-
                         for (var i = 0; i < rows.length; i++) {
                             rows[i] = rows[i].split(',');
                         }
@@ -152,16 +163,16 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                         var first_event = hours_col + 1;
                         var last_event = headers.length - 1;
                         for (var e = first_event; e <= last_event; e++) {
+                            console.log(e);
                             $scope.event = {
-                                date: null,
+                                date: headers[e],
                                 volunteers: []
                             };
-                            $scope.event.date = headers[e];
                             for (var user = 0; user < rows.length; user++) {
                                 var yourHours = parseFloat(rows[user][e], 10);
                                 if (yourHours > 0) {
                                     $scope.event.volunteers.push({
-                                        name: rows[user][fname_col] + ' ' + rows[user][lname_col],
+                                        name: (rows[user][fname_col].trim() + ' ' + rows[user][lname_col].trim()).trim(),
                                         hours: yourHours
                                     });
                                 }
