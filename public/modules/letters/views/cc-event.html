@@ -36,7 +36,7 @@
 				<div class="form-group">
 					<label>{{radioModel === 'users' ? 'Contact' : 'Event' }} Info</label>
 					<input type="text" class="profile form-control" ng-model="partner.username" placeholder="username" ng-show="radioModel === 'users'">
-					<input type="text" class="profile form-control" datepicker-popup="MM/dd/yy" ng-model="event.date" is-open="opened" datepicker-options="dateOptions" show-button-bar="false" ng-click="open($event)" ng-show="radioModel === 'events'" placeholder="mm/dd/yy">
+					<input type="text" class="profile form-control" datepicker-popup="MM/dd/yy" ng-model="event.date" is-open="opened" datepicker-options="dateOptions" show-button-bar="false" ng-click="open" ng-show="radioModel === 'events'">
 					<input type="text" class="profile form-control" ng-model="event.shift" placeholder="event shift (optional)" ng-show="radioModel === 'events'">
 				</div>
 
@@ -66,42 +66,17 @@
 		<div ng-class="needToUpdate ? 'col-md-6 pull-left col-sm-12 col-xs-12' : 'col-md-4 pull-right col-sm-6 col-xs-12'">
 
 			<div class="btn-group pull-right">
-				<label class="btn btn-radio" ng-model="radioModel" btn-radio="'users'" ng-click="viewUsers()"><i class="glyphicon glyphicon-user"></i></label>
-				<label class="btn btn-radio" ng-model="radioModel" btn-radio="'events'" ng-click="viewEvents()"><i class="glyphicon glyphicon-calendar"></i></label>
+				<label class="btn btn-radio" ng-model="radioModel" btn-radio="'users'"><i class="glyphicon glyphicon-user"></i></label>
+				<label class="btn btn-radio" ng-model="radioModel" btn-radio="'events'"><i class="glyphicon glyphicon-calendar"></i></label>
 			</div>
 
-<!--            <div class="btn-group" dropdown>
-			  <button type="button" class="btn btn-default"><i class="glyphicon glyphicon-filter"></i> Filter by Status</button>
-			  <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle>
-				<span class="caret"></span>
-				<span class="sr-only">Split button!</span>
-			  </button>
-			  <ul class="dropdown-menu" role="menu">
-				<li><a href="#">Action</a></li>
-				<li><a href="#">Another action</a></li>
-				<li><a href="#">Something else here</a></li>
-				<li class="divider"></li>
-				<li><a href="#">Separated link</a></li>
-			  </ul>
-			</div> -->
-
-<!--            <div class="form-group">
-				<select class="form-control" ng-model="query.status" ng-change="updateURL()">
-					<option value="">Filter by Status</option>
-					<option value="0">Not Yet Started</option>
-					<option value="1">In Progress</option>
-					<option value="3">Submitted</option>
-					<option value="4">Under Review</option>
-					<option value="5">Reviewed</option>
-				</select>
-			</div> -->
 		</div>
 	</div>
 
 	<div class="row">
 
 		<!-- User View -->
-		<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="partner in partners | orderBy: ['-submitted', 'last_name', 'first_name', 'username'] | filter:query as results" ng-if="partner.role === 'user'" ng-show="radioModel === 'users'">
+		<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="partner in partners | orderBy: ['-submitted', 'last_name', 'first_name', 'username'] | filter:query as results" ng-if="partner.role != 'admin'" ng-show="radioModel === 'users'">
 			<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false" ng-class="partner.submitted ? 'box-complete' : 'box-empty'">
 				
 				<div class="text-center" ng-show="!partner.submitted">

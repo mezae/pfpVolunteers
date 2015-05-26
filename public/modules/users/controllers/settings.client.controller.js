@@ -12,24 +12,9 @@ angular.module('users').controller('SettingsController', ['$scope', '$http', '$l
             agencyId: $stateParams.agencyId
         });
 
-        $scope.relatedEvents = Events.query({}, function() {
-            $scope.relatedEvents = _.filter($scope.relatedEvents, function(event) {
-                return _.find(event.volunteers, {
-                    'name': $scope.currentUser.first_name + ' ' + $scope.currentUser.last_name
-                });
-            });
-
-            $scope.relatedEvents = _.map($scope.relatedEvents, function(event) {
-                event.volunteers = _.find(event.volunteers, {
-                    'name': $scope.currentUser.first_name + ' ' + $scope.currentUser.last_name
-                });
-                return event;
-            });
-        });
-
-        $scope.radioModel = 'users';
-
-
+        $scope.viewVolunteerSummary = function() {
+            $location.path('/admin/user/' + $stateParams.agencyId + '/summary');
+        };
 
         // Update a user profile
         $scope.updateUserProfile = function(isValid) {

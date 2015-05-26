@@ -4,13 +4,8 @@ module.exports = {
     db: process.env.MONGOLAB_URI,
     assets: {
         lib: {
-            css: [
-                'public/lib/bootstrap/dist/css/bootstrap.min.css',
-                'public/lib/bootstrap/dist/css/bootstrap-theme.min.css'
-            ],
+            css: [],
             js: [
-                'public/lib/angular/angular.min.js',
-                'public/lib/angular-resource/angular-resource.min.js',
                 'public/lib/angular-cookies/angular-cookies.min.js',
                 'public/lib/angular-animate/angular-animate.min.js',
                 'public/lib/angular-touch/angular-touch.min.js',

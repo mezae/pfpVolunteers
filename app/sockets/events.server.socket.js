@@ -4,21 +4,21 @@
 
 'use strict';
 
-var users = require('../models/user.server.model');
+var events = require('../models/event.server.model');
 
 exports.register = function(socket) {
-    users.schema.post('save', function(doc) {
+    events.schema.post('save', function(doc) {
         onSave(socket, doc);
     });
-    users.schema.post('remove', function(doc) {
+    events.schema.post('remove', function(doc) {
         onRemove(socket, doc);
     });
 };
 
 function onSave(socket, doc, cb) {
-    socket.emit('users:save', doc);
+    socket.emit('events:save', doc);
 }
 
 function onRemove(socket, doc, cb) {
-    socket.emit('users:remove', doc);
+    socket.emit('events:remove', doc);
 }

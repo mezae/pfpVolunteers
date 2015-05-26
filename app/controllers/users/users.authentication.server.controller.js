@@ -23,7 +23,7 @@ exports.signup = function(req, res) {
 
     // Add missing user fields
     user.provider = 'local';
-    user.password = 'volunteer87';
+    user.password = process.env.USER_PW;
 
     // Then save the user 
     user.save(function(err) {

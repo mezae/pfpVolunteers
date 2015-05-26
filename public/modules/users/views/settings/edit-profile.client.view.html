@@ -6,19 +6,18 @@
 
 	<p class="text-center em-center col-md-9" ng-hide="user.role === 'admin'">The Student Admissions Committee assists the Admissions staff in conducting certain critical aspects of the admissions process which include Parent Meetings and First Level Testing. All members have the responsibility of completing specific assignments assigned by the Admissions staff during those allotted times. The dates for these events are on Saturdays and a few on holiday breaks. We do not ask the Admissions Committee to come in during the school week.</p>
 
-	<h3 class="text-center" ng-show="user.role === 'admin' && radioModel === 'users'">Contact Information</h3>
-	<h3 class="text-center" ng-show="user.role === 'admin' && radioModel === 'events'">Volunteer Summary</h3>
+	<h3 class="text-center" ng-show="user.role === 'admin'">Contact Information</h3>
 
 	<div class="btn-group pull-right" ng-show="user.role === 'admin'">
-		<label class="btn btn-radio" ng-model="radioModel" btn-radio="'users'"><i class="glyphicon glyphicon-user"></i></label>
-		<label class="btn btn-radio" ng-model="radioModel" btn-radio="'events'"><i class="glyphicon glyphicon-calendar"></i></label>
+		<label class="btn btn-radio active"><i class="glyphicon glyphicon-user"></i></label>
+		<label class="btn btn-radio" ng-click="viewVolunteerSummary()"><i class="glyphicon glyphicon-calendar"></i></label>
 	</div>
 
 	</div>
 
 	<div class="col-xs-offset-2 col-xs-8 col-md-offset-4 col-md-4">
 
-		<form name="userForm" data-ng-submit="updateUserProfile(userForm.$valid)" class="signin" autocomplete="off" ng-show="radioModel === 'users'">
+		<form name="userForm" data-ng-submit="updateUserProfile(userForm.$valid)" class="signin" autocomplete="off">
 			<fieldset>
 
 				<div class="form-group col-md-6">
@@ -168,22 +167,6 @@
 					<strong data-ng-bind="error"></strong>
 				</div>
 		</form>
-
-		<table class="table table-striped" ng-show="radioModel === 'events'">
-			<tr>
-				<th>Event Date</th>
-				<th># of Hours</th>
-			</tr>
-			<tr ng-repeat="event in relatedEvents | orderBy: 'date'">
-				<td><a href="/#!/admin/event/{{event._id}}" class="btn-link">{{event.date | date: 'shortDate'}}</a></td>
-				<td>{{event.volunteers.hours}}</td>
-			</tr>
-			<tr>
-				<td><strong>Total</strong></td>
-				<td>{{currentUser.hours}}</td>
-			</tr>
-		</table>
-
 	</div>
 
 </section>

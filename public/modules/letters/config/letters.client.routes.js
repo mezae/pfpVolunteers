@@ -9,6 +9,10 @@ angular.module('letters').config(['$stateProvider',
             url: '/admin:status',
             templateUrl: 'modules/letters/views/command.html'
         }).
+        state('cc-events', {
+            url: '/admin/events',
+            templateUrl: 'modules/letters/views/command.html'
+        }).
         state('adminSettings', {
             url: '/admin/settings',
             templateUrl: 'modules/letters/views/settings.html'
@@ -20,6 +24,10 @@ angular.module('letters').config(['$stateProvider',
         state('tracking', {
             url: '/admin/user/:agencyId',
             templateUrl: 'modules/users/views/settings/edit-profile.client.view.html'
+        }).
+        state('summary', {
+            url: '/admin/user/:agencyId/summary',
+            templateUrl: 'modules/users/views/settings/volunteer-summary.client.view.html'
         }).
         state('agTracking', {
             url: '/user/:agencyId',

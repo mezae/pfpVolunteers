@@ -239,6 +239,10 @@ angular.module('letters').config(['$stateProvider',
             url: '/admin:status',
             templateUrl: 'modules/letters/views/command.html'
         }).
+        state('cc-events', {
+            url: '/admin/events',
+            templateUrl: 'modules/letters/views/command.html'
+        }).
         state('adminSettings', {
             url: '/admin/settings',
             templateUrl: 'modules/letters/views/settings.html'
@@ -250,6 +254,10 @@ angular.module('letters').config(['$stateProvider',
         state('tracking', {
             url: '/admin/user/:agencyId',
             templateUrl: 'modules/users/views/settings/edit-profile.client.view.html'
+        }).
+        state('summary', {
+            url: '/admin/user/:agencyId/summary',
+            templateUrl: 'modules/users/views/settings/volunteer-summary.client.view.html'
         }).
         state('agTracking', {
             url: '/user/:agencyId',
@@ -272,18 +280,31 @@ angular.module('letters').config(['$stateProvider',
 'use strict';
 /* global _: false */
 
-angular.module('letters').controller('CommandCenterController', ['$scope', '$window', '$modal', '$http', '$location', '$filter', 'Authentication', 'Agencies', 'Events', 'Users', 'socket',
-    function($scope, $window, $modal, $http, $location, $filter, Authentication, Agencies, Events, Users, socket) {
+angular.module('letters').controller('CommandCenterController', ['$scope', '$window', '$state', '$http', '$location', '$filter', 'Authentication', 'Agencies', 'Events', 'Users', 'socket',
+    function($scope, $window, $state, $http, $location, $filter, Authentication, Agencies, Events, Users, socket) {
         $scope.user = Authentication.user;
         if (!$scope.user) $location.path('/').replace();
         if ($location.search()) $scope.query = $location.search();
 
-        $scope.radioModel = 'users';
         $scope.needToUpdate = false; //helps hide sidebar when it's not needed
         $scope.alert = {
             active: false,
             type: '',
             msg: ''
+        };
+
+        $scope.viewUsers = function() {
+            $scope.radioModel = 'users';
+            $state.go('command', {}, {
+                notify: false
+            });
+        };
+
+        $scope.viewEvents = function() {
+            $scope.radioModel = 'events';
+            $state.go('cc-events', {}, {
+                notify: false
+            });
         };
 
         $scope.updateURL = function(undo) {
@@ -297,6 +318,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
 
         $scope.find = function() {
             $scope.query = '';
+            $scope.radioModel = 'users';
             Agencies.query({}, function(users) {
                 $scope.partners = users;
                 socket.syncUpdates('users', $scope.partners);
@@ -304,7 +326,10 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
 
             Events.query({}, function(events) {
                 $scope.events = events;
+                socket.syncUpdates('events', $scope.events);
             });
+
+            if ($state.current.url === '/admin/events') $scope.viewEvents();
         };
 
         //Allows user to add create new accounts, consider moving to backend
@@ -534,6 +559,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
 
         $scope.$on('$destroy', function() {
             socket.unsyncUpdates('users');
+            socket.unsyncUpdates('events');
         });
 
         $scope.writeServiceLetter = function(student_id) {
@@ -1594,24 +1620,9 @@ angular.module('users').controller('SettingsController', ['$scope', '$http', '$l
             agencyId: $stateParams.agencyId
         });
 
-        $scope.relatedEvents = Events.query({}, function() {
-            $scope.relatedEvents = _.filter($scope.relatedEvents, function(event) {
-                return _.find(event.volunteers, {
-                    'name': $scope.currentUser.first_name + ' ' + $scope.currentUser.last_name
-                });
-            });
-
-            $scope.relatedEvents = _.map($scope.relatedEvents, function(event) {
-                event.volunteers = _.find(event.volunteers, {
-                    'name': $scope.currentUser.first_name + ' ' + $scope.currentUser.last_name
-                });
-                return event;
-            });
-        });
-
-        $scope.radioModel = 'users';
-
-
+        $scope.viewVolunteerSummary = function() {
+            $location.path('/admin/user/' + $stateParams.agencyId + '/summary');
+        };
 
         // Update a user profile
         $scope.updateUserProfile = function(isValid) {
@@ -1637,6 +1648,46 @@ angular.module('users').controller('SettingsController', ['$scope', '$http', '$l
                 $scope.error = response.message;
             });
         };
+    }
+]);
+'use strict';
+/* global _: false */
+
+angular.module('users').controller('SummaryController', ['$scope', '$http', '$location', '$stateParams', 'Users', 'Agencies', 'Authentication', 'Events',
+    function($scope, $http, $location, $stateParams, Users, Agencies, Authentication, Events) {
+        $scope.user = Authentication.user;
+
+        $scope.find = function() {
+            // If user is not signed in then redirect back home
+            if (!$scope.user || $scope.user.role === 'user') $location.path('/');
+
+            Agencies.get({
+                agencyId: $stateParams.agencyId
+            }, function(user) {
+                $scope.currentUser = user;
+
+                $scope.relatedEvents = Events.query({}, function() {
+                    $scope.relatedEvents = _.filter($scope.relatedEvents, function(event) {
+                        return _.find(event.volunteers, {
+                            'name': $scope.currentUser.first_name + ' ' + $scope.currentUser.last_name
+                        });
+                    });
+
+                    $scope.relatedEvents = _.map($scope.relatedEvents, function(event) {
+                        event.volunteers = _.find(event.volunteers, {
+                            'name': $scope.currentUser.first_name + ' ' + $scope.currentUser.last_name
+                        });
+                        return event;
+                    });
+                });
+
+            });
+        };
+
+        $scope.viewContactInfo = function() {
+            $location.path('/admin/user/' + $stateParams.agencyId);
+        };
+
     }
 ]);
 'use strict';

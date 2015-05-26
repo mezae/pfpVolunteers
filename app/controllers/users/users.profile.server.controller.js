@@ -46,7 +46,7 @@ exports.topdf = function(req, res) {
 
 //Allows admin access to all community partner accounts
 exports.list = function(req, res) {
-    User.find({}, '-salt -password -acceptance -created -provider -roles').exec(function(err, users) {
+    User.find({}, 'first_name last_name hours role submitted').exec(function(err, users) {
         if (err) {
             return res.status(400).send({
                 message: errorHandler.getErrorMessage(err)
@@ -59,7 +59,7 @@ exports.list = function(req, res) {
 
 //Allows admin access to individual community partner accounts
 exports.agencyByID = function(req, res, next, id) {
-    User.findById(id).exec(function(err, agency) {
+    User.findById(id, '-salt -password -provider -created').exec(function(err, agency) {
         if (err) return next(err);
         if (!agency) return next(new Error('Failed to load article ' + id));
         req.user = agency;

@@ -18,6 +18,7 @@ function onConnect(socket) {
 
     // Insert sockets below
     require('../app/sockets/users.server.socket').register(socket);
+    require('../app/sockets/events.server.socket').register(socket);
 }
 
 module.exports = function(socketio) {

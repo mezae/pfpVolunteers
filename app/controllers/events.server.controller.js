@@ -118,7 +118,7 @@ exports.index = function(req, res) {
         var offset = req.query.offset ? req.query.offset : '';
         var limit = req.query.limit ? req.query.limit : '';
 
-        Event.find(query, '-created').sort('track').skip(offset).limit(limit).exec(function(err, letters) {
+        Event.find(query, '-created -totalHours -updated').sort('track').skip(offset).limit(limit).exec(function(err, letters) {
             if (err) {
                 return res.status(400).send({
                     message: errorHandler.getErrorMessage(err)

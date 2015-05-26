@@ -1,18 +1,31 @@
 'use strict';
 /* global _: false */
 
-angular.module('letters').controller('CommandCenterController', ['$scope', '$window', '$modal', '$http', '$location', '$filter', 'Authentication', 'Agencies', 'Events', 'Users', 'socket',
-    function($scope, $window, $modal, $http, $location, $filter, Authentication, Agencies, Events, Users, socket) {
+angular.module('letters').controller('CommandCenterController', ['$scope', '$window', '$state', '$http', '$location', '$filter', 'Authentication', 'Agencies', 'Events', 'Users', 'socket',
+    function($scope, $window, $state, $http, $location, $filter, Authentication, Agencies, Events, Users, socket) {
         $scope.user = Authentication.user;
         if (!$scope.user) $location.path('/').replace();
         if ($location.search()) $scope.query = $location.search();
 
-        $scope.radioModel = 'users';
         $scope.needToUpdate = false; //helps hide sidebar when it's not needed
         $scope.alert = {
             active: false,
             type: '',
             msg: ''
+        };
+
+        $scope.viewUsers = function() {
+            $scope.radioModel = 'users';
+            $state.go('command', {}, {
+                notify: false
+            });
+        };
+
+        $scope.viewEvents = function() {
+            $scope.radioModel = 'events';
+            $state.go('cc-events', {}, {
+                notify: false
+            });
         };
 
         $scope.updateURL = function(undo) {
@@ -26,6 +39,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
 
         $scope.find = function() {
             $scope.query = '';
+            $scope.radioModel = 'users';
             Agencies.query({}, function(users) {
                 $scope.partners = users;
                 socket.syncUpdates('users', $scope.partners);
@@ -33,7 +47,10 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
 
             Events.query({}, function(events) {
                 $scope.events = events;
+                socket.syncUpdates('events', $scope.events);
             });
+
+            if ($state.current.url === '/admin/events') $scope.viewEvents();
         };
 
         //Allows user to add create new accounts, consider moving to backend
@@ -263,6 +280,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
 
         $scope.$on('$destroy', function() {
             socket.unsyncUpdates('users');
+            socket.unsyncUpdates('events');
         });
 
         $scope.writeServiceLetter = function(student_id) {
