@@ -32,18 +32,6 @@ angular.module('letters').config(['$stateProvider',
         state('agTracking', {
             url: '/user/:agencyId',
             templateUrl: 'modules/users/views/settings/edit-profile.client.view.html'
-        }).
-        state('email', {
-            url: '/admin/email',
-            templateUrl: 'modules/letters/views/emails.html'
-        }).
-        state('etemplate', {
-            url: '/admin/email/:template',
-            templateUrl: 'modules/letters/views/etemplate.html'
-        }).
-        state('email-success', {
-            url: '/admin/emails/success',
-            templateUrl: 'modules/letters/views/esent.html'
         });
     }
 ]);

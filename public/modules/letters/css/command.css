@@ -17,16 +17,6 @@
   cursor: pointer;
 }
 
-.emailnail {
-  height: 10em;
-}
-
-.editEtemplate {
-  position: absolute;
-  top: 10.2em;
-  right: 1.5em;
-}
-
 .agency-box {
 	border-width: 1px;
 	border-style: solid;
@@ -39,6 +29,7 @@
   min-height: 92px;
   transition: border .2s ease-in-out;
   -o-transition: border .2s ease-in-out;
+  -moz-transition: border .2s ease-in-out;
   -webkit-transition: border .2s ease-in-out;
 }
 

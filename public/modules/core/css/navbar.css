@@ -1,19 +1,16 @@
-.navbar-image {
-  height: 50px;
-  width: auto;
+.desaturate {
+	filter: brightness(0) invert(1);
+	-webkit-filter: brightness(0) invert(1);
+	max-height: 30px;
 }
 
 .navbar {
   margin-bottom: 2px;
-  background: linear-gradient(#9A162D, #9C182F);
-  background: -webkit-linear-gradient(#9A162D, #9C182F);
-  background: -moz-linear-gradient(#9A162D, #9C182F);
-  background: -o-linear-gradient(#9A162D, #9C182F);
-  background: -webkit-gradient(#9A162D, #9C182F);
+  background-color: #9C182F;
 }
 
 .navbar-brand {
-  padding: 0 15px;
+	padding: 10px 10px;
 }
 
 a {

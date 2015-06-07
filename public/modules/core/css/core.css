@@ -219,8 +219,9 @@ footer {
   border-left-width: 0;
   border-right-width: 0;
   border-radius: 0;
-  box-shadow: none;
   -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
 }
 
 .profile:focus {
@@ -229,7 +230,9 @@ footer {
 }
 
 @media print {
-body {-webkit-print-color-adjust: exact;}
+  body {
+    -webkit-print-color-adjust: exact;
+  }
 }
 
 .tutor-box {

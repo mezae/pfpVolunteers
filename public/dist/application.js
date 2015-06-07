@@ -209,18 +209,6 @@ angular.module('core').controller('HomeController', ['$scope', '$location', 'Aut
         if ($scope.user) redirect($scope.user);
     }
 ]);
-'use strict';
-
-// Users service used for communicating with the users REST endpoint
-angular.module('core').factory('Users', ['$resource',
-	function($resource) {
-		return $resource('users', {}, {
-			update: {
-				method: 'PUT'
-			}
-		});
-	}
-]);
 
 'use strict';
 
@@ -262,18 +250,6 @@ angular.module('letters').config(['$stateProvider',
         state('agTracking', {
             url: '/user/:agencyId',
             templateUrl: 'modules/users/views/settings/edit-profile.client.view.html'
-        }).
-        state('email', {
-            url: '/admin/email',
-            templateUrl: 'modules/letters/views/emails.html'
-        }).
-        state('etemplate', {
-            url: '/admin/email/:template',
-            templateUrl: 'modules/letters/views/etemplate.html'
-        }).
-        state('email-success', {
-            url: '/admin/emails/success',
-            templateUrl: 'modules/letters/views/esent.html'
         });
     }
 ]);
@@ -587,83 +563,6 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
     }
 ]);
 'use strict';
-
-angular.module('letters')
-
-.controller('EmailsController', ['$scope', '$modal', '$http', '$stateParams', '$location', '$filter', 'Authentication', 'Agencies', 'Articles', 'Users',
-	function($scope, $modal, $http, $stateParams, $location, $filter, Authentication, Agencies, Articles, Users) {
-		$scope.user = Authentication.user;
-
-		if (!$scope.user) $location.path('/');
-
-		$scope.etemplate = $filter('filter')($scope.user.acceptance, {title: $stateParams.template})[0];
-		var templateIndex = $scope.user.acceptance.indexOf($scope.etemplate);
-		$scope.needToUpdate = false;
-
-		//Send e-mail based on template
-		$scope.sendEmail = function() {
-			$scope.error = null;
-			$scope.saveTemplate();
-			$http.post('/accept', $scope.user.acceptance[templateIndex]).success(function(response) {
-				$location.path('/admin/emails/success');
-			}).error(function(response) {
-				$scope.error = response.data.message;
-			});
-		};
-
-		//Create new template or save existing template
-		$scope.saveTemplate = function() {
-			$scope.success = $scope.error = null;
-			if(templateIndex > -1) {
-				$scope.user.acceptance[templateIndex] = $scope.etemplate;
-			}
-			else {
-				$scope.user.acceptance.push($scope.etemplate);
-			}
-
-			var user = new Users($scope.user);
-			user.$update(function(response) {
-				$scope.user = response;
-				$scope.success = true;
-				if($location.path() === '/admin/email') {
-					$scope.hideSidebar();
-				}
-			}, function(response) {
-				$scope.error = response.data.message;
-			});
-		};
-
-		//Show current state of template that user wants to edit
-		$scope.showSidebar = function(selected) {
-			$scope.etemplate = selected;
-			templateIndex = $scope.user.acceptance.indexOf($scope.etemplate);
-			$scope.needToUpdate = true;
-		};
-
-		//Hide sidebar and clear variables
-		$scope.hideSidebar = function() {
-			$scope.etemplate = null;
-			templateIndex = null;
-			$scope.needToUpdate = false;
-		};
-
-		//Allow user to delete selected partner and all associated recipients
-		$scope.deleteAgency = function(selected) {
-			var confirmation = prompt('Please type DELETE to remove the ' + selected.title + ' template.');
-			if(confirmation === 'DELETE') {
-				$scope.user.acceptance.splice($scope.user.acceptance.indexOf(selected), 1);
-				var user = new Users($scope.user);
-				user.$update(function(response) {
-					$scope.user = response;
-					$scope.success = true;
-				}, function(response) {
-					$scope.error = response.data.message;
-				});
-			}
-		};
-
-}]);
-'use strict';
 /* global _: false */
 
 angular.module('letters').controller('EventsController', ['$scope', '$window', '$stateParams', '$location', '$filter', '$timeout', 'Authentication', 'Events', 'Agencies', 'Users', 'socket',
@@ -863,158 +762,18 @@ angular.module('letters').controller('myController', ['$scope', '$window', '$mod
         };
 
         $scope.reset = function() {
-            $http.get('/users/reset').success(function(response) {
-                // If successful we assign the response to the global user model
-                Authentication.user = response;
-            }).error(function(response) {
-                $scope.error = response.message;
-            });
+            var confirmation = $window.prompt('Type DELETE to wipe all data');
+            if (confirmation === 'DELETE') {
+                $http.get('/users/reset').success(function(response) {
+                    // If successful we assign the response to the global user model
+                    Authentication.user = response;
+                }).error(function(response) {
+                    $scope.error = response.message;
+                });
+            }
         };
     }
 ]);
-'use strict';
-/* global d3: false */
-
-angular.module('letters').directive('activity', function() {
-    return {
-        restrict: 'E',
-        scope: {
-            data: '='
-        },
-        link: function(scope, elem) {
-            var element = elem[0];
-            var margin = {
-                    top: 20,
-                    right: 30,
-                    bottom: 40,
-                    left: 40
-                },
-                width = element.clientWidth - margin.left - margin.right,
-                height = 300 - margin.top - margin.bottom;
-
-            scope.$watch('data', function(data) {
-                if (data) {
-                    var parseDate = d3.time.format('%Y-%m-%d').parse;
-                    var formatTime = d3.time.format('%B %e'); // Format tooltip date / time
-
-                    data.forEach(function(d) {
-                        d.date = parseDate(d.date);
-
-                    });
-
-                    var x = d3.time.scale()
-                        .range([0, width]);
-
-                    var y = d3.scale.linear()
-                        .range([height, 0]);
-
-                    var xAxis = d3.svg.axis()
-                        .scale(x)
-                        .ticks(d3.time.week, 1)
-                        .tickFormat(d3.time.format('%m/%d'))
-                        .orient('bottom');
-
-                    var yAxis = d3.svg.axis()
-                        .scale(y)
-                        .ticks(5)
-                        .tickFormat(d3.format('d'))
-                        .tickSubdivide(0)
-                        .orient('left');
-
-                    var div = d3.select('body')
-                        .append('div') // declare the tooltip div 
-                        .attr('class', 'timeTooltip') // apply the 'tooltip' class
-                        .style('opacity', 0); // set the opacity to nil
-
-                    var line = d3.svg.line()
-                        .x(function(d) {
-                            return x(d.date);
-                        })
-                        .y(function(d) {
-                            return y(d.count);
-                        });
-
-                    x.domain(d3.extent(data, function(d) {
-                        return d.date;
-                    }));
-                    y.domain(d3.extent(data, function(d) {
-                        return d.count;
-                    }));
-
-                    var chart = d3.select(element).append('svg')
-                        .attr('width', width + margin.left + margin.right)
-                        .attr('height', height + margin.top + margin.bottom)
-                        .append('g')
-                        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-                    chart.append('g')
-                        .attr('class', 'x axis')
-                        .attr('transform', 'translate(0,' + height + ')')
-                        .call(xAxis)
-                        .selectAll('text')
-                        .style('text-anchor', 'end')
-                        .attr('dx', '-.8em')
-                        .attr('dy', '.15em')
-                        .attr('transform', function(d) {
-                            return 'rotate(-65)';
-                        });
-
-                    chart.append('g')
-                        .attr('class', 'y axis')
-                        .call(yAxis);
-
-                    chart.append('text')
-                        .attr('transform', 'rotate(-90)')
-                        .attr('y', 0 - margin.left)
-                        .attr('x', 0 - (height / 2))
-                        .attr('dy', '1em')
-                        .style('text-anchor', 'middle')
-                        .text('# of Wishes Added');
-
-                    chart.append('path')
-                        .datum(data)
-                        .attr('class', 'line')
-                        .attr('d', line);
-
-                    chart.selectAll('dot')
-                        .data(data.filter(function(d) {
-                            return d.count > 0;
-                        }))
-                        .enter().append('circle')
-                        .attr('class', 'circle')
-                        .attr('r', 3.5)
-                        .attr('cx', function(d) {
-                            return x(d.date);
-                        })
-                        .attr('cy', function(d) {
-                            return y(d.count);
-                        })
-
-                    // Tooltip stuff after this
-                    .on('mouseover', function(d) {
-                        div.transition()
-                            .duration(500)
-                            .style('opacity', 0);
-                        div.transition()
-                            .duration(200)
-                            .style('opacity', 0.8);
-                        div.html(
-                            formatTime(d.date) +
-                            '<br/>Wishes Added: ' + d.count)
-                            .style('left', (d3.event.pageX) + 'px')
-                            .style('top', (d3.event.pageY - 28) + 'px');
-                    })
-
-                    .on('mouseout', function(d) {
-                        div.transition()
-                            .duration(1000)
-                            .style('opacity', 0);
-                    });
-                }
-            }, true);
-        }
-    };
-});
 'use strict';
 
 //Letters service used for communicating with the agencies REST endpoints
@@ -1027,230 +786,6 @@ angular.module('letters').factory('Agencies', ['$resource',
                 method: 'PUT'
             }
         });
-    }
-]);
-
-
-// angular.module('2meanApp')
-//     .factory('User', function($resource) {
-//         return $resource('/api/users/:id/:controller', {
-//             id: '@_id'
-//         }, {
-//             changePassword: {
-//                 method: 'PUT',
-//                 params: {
-//                     controller: 'password'
-//                 }
-//             },
-//             updateProfile: {
-//                 method: 'PUT',
-//                 params: {
-//                     controller: 'profile'
-//                 }
-//             },
-//             get: {
-//                 method: 'GET',
-//                 params: {
-//                     id: 'me'
-//                 }
-//             }
-//         });
-//     });
-'use strict';
-/* global d3: false */
-
-angular.module('letters').directive('donut', ['$location',
-    function($location) {
-        return {
-            restrict: 'E',
-            scope: {
-                data: '='
-            },
-            link: function(scope, elem) {
-                var element = elem[0];
-                var width = element.clientWidth,
-                    height = 320,
-                    radius = Math.min(width, height) / 2,
-                    outerRadius = height / 2 - 20,
-                    innerRadius = outerRadius / 2;
-
-                function arcTween(arc, outerRadius, delay) {
-                    return function() {
-                        d3.select(this)
-                            .transition()
-                            .delay(delay)
-                            .attrTween('d', function(d) {
-                                var i = d3.interpolate(d.outerRadius, outerRadius);
-                                return function(t) {
-                                    d.outerRadius = i(t);
-                                    return arc(d);
-                                };
-                            });
-                    };
-                }
-
-                scope.$watch('data', function(data) {
-                        if (data) {
-
-                            var color = d3.scale.ordinal()
-                                .range(['#cd4d52', '#cd884d', '#85c739', '#4d92cd', '#7b39c7']);
-
-                            var pie = d3.layout.pie()
-                                .padAngle(0.01)
-                                .sort(null)
-                                .value(function(d) {
-                                    return d.count;
-                                });
-
-                            var arc = d3.svg.arc()
-                                .padRadius(outerRadius)
-                                .innerRadius(innerRadius);
-
-                            var div = d3.select('body')
-                                .append('div') // declare the tooltip div 
-                                .attr('class', 'donutTooltip') // apply the 'tooltip' class
-                                .style('opacity', 0); // set the opacity to nil
-
-                            var svg = d3.select(element).append('svg')
-                                .attr('width', width)
-                                .attr('height', height);
-
-                            var chart = svg.append('g')
-                                .attr('transform', 'translate(' + width / 2 + ',' + (height / 2 - 20) + ')');
-
-                            data.forEach(function(d) {
-                                d.count = +d.count;
-                            });
-
-                            var g = chart.selectAll('.arc')
-                                .data(pie(data))
-                                .enter().append('g')
-                                .attr('class', 'arc');
-
-                            g.append('path')
-                                .each(function(d) {
-                                    d.outerRadius = outerRadius - 10;
-                                })
-                                .attr('d', arc)
-                                .style('fill', function(d) {
-                                    return color(d.data.status);
-                                })
-                                .style('cursor', 'pointer')
-                                .on('mouseover', function(d) {
-                                    d3.select(this)
-                                        .transition()
-                                        .delay(0)
-                                        .attrTween('d', function(d) {
-                                            var i = d3.interpolate(d.outerRadius, outerRadius - 2);
-                                            return function(t) {
-                                                d.outerRadius = i(t);
-                                                return arc(d);
-                                            };
-                                        });
-                                    div.transition()
-                                        .duration(0)
-                                        .style('opacity', 0);
-                                    div.transition()
-                                        .duration(200)
-                                        .style('opacity', 0.8);
-                                    div.html(
-                                        d.data.name + ': ' + d.data.count)
-                                        .style('left', (d3.event.pageX + 14) + 'px')
-                                        .style('top', (d3.event.pageY + 14) + 'px');
-
-                                })
-                                .on('mousemove', function() {
-                                    div
-                                        .style('left', (d3.event.pageX + 10) + 'px')
-                                        .style('top', (d3.event.pageY + 16) + 'px');
-                                })
-                                .on('mouseout', function(d) {
-                                    d3.select(this)
-                                        .transition()
-                                        .delay(100)
-                                        .attrTween('d', function(d) {
-                                            var i = d3.interpolate(d.outerRadius, outerRadius - 10);
-                                            return function(t) {
-                                                d.outerRadius = i(t);
-                                                return arc(d);
-                                            };
-                                        });
-                                    div.transition()
-                                        .duration(1000)
-                                        .style('opacity', 0);
-                                })
-                                .on('click', function(d) {
-                                    //$location.path('/admin');
-                                    window.location.href = '/#!/admin?status=' + d.data.status;
-                                });
-
-                            g.append('text')
-                                .attr('transform', function(d) {
-                                    return 'translate(' + arc.centroid(d) + ')';
-                                })
-                                .attr('dy', '.35em')
-                                .style('text-anchor', 'middle')
-                                .text(function(d) {
-                                    return d.data.percent;
-                                });
-
-                            chart.append('text')
-                                .attr('class', 'donutTitle')
-                                .style('text-anchor', 'middle')
-                                .text('Progress');
-
-                            var legendContainer = svg.append('g')
-                                .attr('transform', 'translate(10,' + (height - 30) + ')');
-
-                            var legend = legendContainer.append('g')
-                                .attr('class', 'legend');
-
-                            var series = legend.selectAll('.series')
-                                .data(pie(data));
-
-                            var seriesEnter = series.enter()
-                                .append('g')
-                                .attr('class', 'series');
-
-                            seriesEnter.append('circle')
-                                .style('fill', function(d, i) {
-                                    return color(d.data.status);
-                                })
-                                .attr('r', 5);
-
-                            seriesEnter.append('text')
-                                .style('fill', 'black')
-                                .text(function(d) {
-                                    return d.data.name;
-                                })
-                                .attr('text-anchor', 'start')
-                                .attr('dy', '.32em')
-                                .attr('dx', '8');
-
-                            var ypos = 5,
-                                newxpos = 35,
-                                maxwidth = 0,
-                                xpos;
-                            series
-                                .attr('transform', function(d, i) {
-                                    var length = legendContainer.selectAll('text')[0][i].getComputedTextLength() + 28;
-                                    xpos = newxpos;
-
-                                    if (width < xpos + length) {
-                                        newxpos = xpos = 35;
-                                        ypos += 20;
-                                    }
-
-                                    newxpos += length;
-                                    if (newxpos > maxwidth) maxwidth = newxpos;
-
-                                    return 'translate(' + xpos + ',' + ypos + ')';
-                                });
-                        }
-                    },
-                    true);
-            }
-        };
     }
 ]);
 'use strict';
@@ -1348,85 +883,6 @@ angular.module('letters')
             };
         }
     ]);
-'use strict';
-/* global d3: false */
-
-angular.module('letters').directive('donutChart', function() {
-    return {
-        restrict: 'E',
-        scope: {
-            data: '='
-        },
-        link: function(scope, elem) {
-            var element = elem[0];
-            var margin = {
-                    top: 20,
-                    right: 30,
-                    bottom: 30,
-                    left: 55
-                },
-                width = element.clientWidth - margin.left - margin.right,
-                height = 300 - margin.top - margin.bottom;
-
-            scope.$watch('data', function(data) {
-                if (data) {
-                    var y = d3.scale.ordinal()
-                        .domain(data.map(function(d) {
-                            return d.name;
-                        }))
-                        .rangeRoundBands([height, 0], 0.05);
-
-                    var x = d3.scale.linear()
-                        .domain([0, d3.max(data, function(d) {
-                            return d.value;
-                        })])
-                        .range([0, width]);
-
-                    var yAxis = d3.svg.axis()
-                        .scale(y)
-                        .orient('left');
-
-                    var chart = d3.select(element).append('svg')
-                        .attr('width', width + margin.left + margin.right)
-                        .attr('height', height + margin.top + margin.bottom)
-                        .append('g')
-                        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-                    chart.append('g')
-                        .attr('class', 'y axis')
-                        .call(yAxis);
-
-                    chart.selectAll('.bar')
-                        .data(data)
-                        .enter().append('rect')
-                        .attr('class', 'bar')
-                        .attr('y', function(d) {
-                            return y(d.name);
-                        })
-                        .attr('width', function(d) {
-                            return x(d.value);
-                        })
-                        .attr('height', y.rangeBand());
-
-                    chart.selectAll('.btext')
-                        .data(data)
-                        .enter().append('text')
-                        .attr('class', 'btext')
-                        .attr('x', function(d) {
-                            return x(d.value) - 3;
-                        })
-                        .attr('y', function(d) {
-                            return y(d.name) + (y.rangeBand() / 2);
-                        })
-                        .attr('dy', '.35em')
-                        .text(function(d) {
-                            return d.value;
-                        });
-                }
-            }, true);
-        }
-    };
-});
 'use strict';
 
 // Config HTTP Error Handling
@@ -1545,21 +1001,13 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$http
             $http.post('/auth/signin', $scope.credentials).success(function(response) {
                 // If successful we assign the response to the global user model
                 Authentication.user = response;
+                $scope.user = Authentication.user;
                 // And redirect to appropriate page
                 redirect(response);
             }).error(function(response) {
                 $scope.error = response.message;
             });
         };
-
-        $scope.signup = function() {
-            $http.post('/auth/signup', $scope.credentials).success(function(response) {
-                console.log('profile created');
-            }).error(function(response) {
-                $scope.error = response.message;
-            });
-        };
-
     }
 ]);
 'use strict';

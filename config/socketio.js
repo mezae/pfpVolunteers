@@ -13,7 +13,7 @@ function onDisconnect(socket) {}
 function onConnect(socket) {
     // When the client emits 'info', this listens and executes
     socket.on('info', function(data) {
-        console.info('[%s] %s', socket.address, JSON.stringify(data, null, 2));
+        console.log('[%s] %s', socket.address, JSON.stringify(data, null, 2));
     });
 
     // Insert sockets below
@@ -38,11 +38,7 @@ module.exports = function(socketio) {
     // }));
 
     socketio.on('connection', function(socket) {
-        socket.address = socket.handshake.address !== null ?
-            socket.handshake.address.address + ':' + socket.handshake.address.port :
-            process.env.DOMAIN;
-
-        console.log(process.env.DOMAIN);
+        socket.address = (socket.handshake !== undefined && socket.handshake.address !== undefined) ? socket.handshake.address : 'IP_ERROR';
 
         socket.connectedAt = new Date();
 
@@ -54,6 +50,6 @@ module.exports = function(socketio) {
 
         // Call onConnect.
         onConnect(socket);
-        console.info('[%s] CONNECTED', socket.address);
+        console.log('[%s] CONNECTED', socket.address);
     });
 };

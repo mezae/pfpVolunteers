@@ -19,20 +19,12 @@ angular.module('users').controller('AuthenticationController', ['$scope', '$http
             $http.post('/auth/signin', $scope.credentials).success(function(response) {
                 // If successful we assign the response to the global user model
                 Authentication.user = response;
+                $scope.user = Authentication.user;
                 // And redirect to appropriate page
                 redirect(response);
             }).error(function(response) {
                 $scope.error = response.message;
             });
         };
-
-        $scope.signup = function() {
-            $http.post('/auth/signup', $scope.credentials).success(function(response) {
-                console.log('profile created');
-            }).error(function(response) {
-                $scope.error = response.message;
-            });
-        };
-
     }
 ]);

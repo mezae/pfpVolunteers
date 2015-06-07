@@ -66,12 +66,15 @@ angular.module('letters').controller('myController', ['$scope', '$window', '$mod
         };
 
         $scope.reset = function() {
-            $http.get('/users/reset').success(function(response) {
-                // If successful we assign the response to the global user model
-                Authentication.user = response;
-            }).error(function(response) {
-                $scope.error = response.message;
-            });
+            var confirmation = $window.prompt('Type DELETE to wipe all data');
+            if (confirmation === 'DELETE') {
+                $http.get('/users/reset').success(function(response) {
+                    // If successful we assign the response to the global user model
+                    Authentication.user = response;
+                }).error(function(response) {
+                    $scope.error = response.message;
+                });
+            }
         };
     }
 ]);
