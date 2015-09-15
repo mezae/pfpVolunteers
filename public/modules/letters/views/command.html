@@ -3,8 +3,19 @@
 
 	<div class="row">
 
-		<div class="col-md-12">
-			<h2>Command Center</h2>
+		<div class="col-md-9 col-sm-9 col-xs-8">
+			<h2 class="btn-link" ng-click="viewEvents()" ng-show="radioModel === 'users'"><i class="fa fa-user"></i> Volunteers</h2>
+
+			<h2 class="btn-link" ng-click="viewUsers()" ng-show="radioModel === 'events'"><i class="fa fa-calendar"></i> Events</h2>
+		</div>
+		<div class="col-md-3 col-sm-3 col-xs-4 text-right hidden-print">
+			<button class="btn btn-lg btn-link" ng-click="startSearch = !startSearch">
+				<i class="fa fa-search"></i>
+			</button>
+			<button class="btn btn-lg btn-link" ng-click="showSidebar()">
+				<i class="fa fa-user-plus" ng-if="radioModel === 'users'"></i>
+				<i class="fa fa-calendar-plus-o" ng-if="radioModel === 'events'"></i>
+			</button>
 		</div>
 
 		<div class="col-md-12">
@@ -26,7 +37,7 @@
 						</span>
 						<input type="text" class="form-control filename col-md-4" ng-model="file.name" id="filename" readonly>
 						<span class="input-group-btn">
-						<input type="button" class="btn btn-review" ng-click="handleFileSelect()" value="Upload"/>
+							<input type="button" class="btn btn-review" ng-click="handleFileSelect()" value="Upload"/>
 						</span>
 					</div>
 				</div>
@@ -49,117 +60,72 @@
 		</div>
 
 
-	<div ng-class="needToUpdate ? 'col-md-9 pull-left col-sm-12 clearfix col-xs-12 clearfix' : 'col-md-12 col-sm-12 col-xs-12'">
- 
-	<div class="row">
-		<div ng-class="needToUpdate ? 'col-md-6 pull-left col-sm-12 clearfix col-xs-12 clearfix' : 'col-md-4 col-sm-6 col-xs-12'">
-			<div class="form-group">
-				<div class="input-group">
-					<span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-					<input type="search" class="form-control" ng-model="query.first_name" ng-show="radioModel === 'users'" placeholder="Search by First Name"/>
-					<input type="search" class="form-control" ng-model="query.date" ng-show="radioModel === 'events'" placeholder="Search by date"/>
-	<!-- 				<input type="search" class="form-control" ng-model="radioModel === 'users' ? query.first_name : query.date" placeholder="Search by {{radioModel === 'users' ? 'First Name' : 'date'}}"/> -->
+		<div ng-class="needToUpdate ? 'col-md-9 pull-left col-sm-12 clearfix col-xs-12 clearfix' : 'col-md-12 col-sm-12 col-xs-12'">
+
+			<!-- search bar -->
+			<div class="row" ng-show="startSearch">
+				<div ng-class="needToUpdate ? 'col-md-6 pull-left col-sm-12 clearfix col-xs-12 clearfix' : 'col-md-4 col-sm-6 col-xs-12'">
+					<div class="form-group">
+						<div class="input-group">
+							<span class="input-group-addon"><i class="fa fa-search"></i></span>
+							<input type="search" class="form-control" ng-model="query.first_name" ng-show="radioModel === 'users'" placeholder="Search by First Name"/>
+							<input type="search" class="form-control" ng-model="query.date" ng-show="radioModel === 'events'" placeholder="Search by date (yyyy-mm-dd)"/>
+						</div>
+					</div>
 				</div>
+
+			</div>
+
+			<div class="row">
+
+				<!-- User View -->
+				<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="partner in partners | orderBy: ['-submitted', 'last_name', 'first_name', 'username'] | filter: query as results" ng-if="partner.role === 'user'" ng-show="radioModel === 'users'">
+					<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false" ng-class="partner.submitted ? 'box-complete' : 'box-empty'">
+
+						<div class="text-center" ng-show="!partner.submitted">
+							<strong>{{partner.username}}</strong>
+						</div>
+						<div class="text-center crop" ng-show="partner.submitted">
+							<strong>{{partner.last_name | uppercase}}, {{partner.first_name}}</strong>
+						</div>
+
+						<p class="text-center" ng-show="!turn">{{partner.hours}} hours</p>
+
+						<div class="text-center" ng-if="turn">
+							<a href="/#!/admin/user/{{partner._id}}" class="btn btn-link agency-btn"><i class="glyphicon glyphicon-eye-open"></i></a>
+
+							<button type="button" class="btn btn-link agency-mid" ng-click="writeServiceLetter(partner._id)"><i class="glyphicon glyphicon-file"></i></button>
+
+							<button type="button" class="btn btn-link agency-btn" ng-click="deleteBox(partner)"><i class="glyphicon glyphicon-trash"></i></button>
+						</div>
+
+					</div>
+				</div>
+
+				<!-- Event View -->
+				<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="event in events | orderBy: '-date' | filter: query as results" ng-show="radioModel === 'events'">
+					<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false">
+
+						<div class="text-center">
+							<strong>{{event.date | date: 'shortDate'}} {{event.shift ? '(' +event.shift + ')' : ''}}</strong>
+						</div>
+
+						<p class="text-center" ng-show="!turn">{{event.volunteers.length}} Volunteers</p>
+
+						<div class="text-center" ng-if="turn">
+							<a href="/#!/admin/event/{{event._id}}" class="btn btn-link agency-btn"><i class="glyphicon glyphicon-eye-open"></i></a>
+
+							<button type="button" class="btn btn-link agency-mid" ng-click="showSidebar(event)"><i class="glyphicon glyphicon-pencil"></i></button>
+
+							<button type="button" class="btn btn-link agency-btn" ng-click="deleteBox(event)"><i class="glyphicon glyphicon-trash"></i></button>
+						</div>
+
+					</div>
+				</div>
+
 			</div>
 		</div>
 
-		<div ng-class="needToUpdate ? 'col-md-6 pull-left col-sm-12 col-xs-12' : 'col-md-4 pull-right col-sm-6 col-xs-12'">
-
-			<div class="btn-group pull-right">
-				<label class="btn btn-radio" ng-model="radioModel" btn-radio="'users'" ng-click="viewUsers()"><i class="glyphicon glyphicon-user"></i></label>
-				<label class="btn btn-radio" ng-model="radioModel" btn-radio="'events'" ng-click="viewEvents()"><i class="glyphicon glyphicon-calendar"></i></label>
-			</div>
-
-<!--            <div class="btn-group" dropdown>
-			  <button type="button" class="btn btn-default"><i class="glyphicon glyphicon-filter"></i> Filter by Status</button>
-			  <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle>
-				<span class="caret"></span>
-				<span class="sr-only">Split button!</span>
-			  </button>
-			  <ul class="dropdown-menu" role="menu">
-				<li><a href="#">Action</a></li>
-				<li><a href="#">Another action</a></li>
-				<li><a href="#">Something else here</a></li>
-				<li class="divider"></li>
-				<li><a href="#">Separated link</a></li>
-			  </ul>
-			</div> -->
-
-<!--            <div class="form-group">
-				<select class="form-control" ng-model="query.status" ng-change="updateURL()">
-					<option value="">Filter by Status</option>
-					<option value="0">Not Yet Started</option>
-					<option value="1">In Progress</option>
-					<option value="3">Submitted</option>
-					<option value="4">Under Review</option>
-					<option value="5">Reviewed</option>
-				</select>
-			</div> -->
-		</div>
 	</div>
-
-	<div class="row">
-
-		<!-- User View -->
-		<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="partner in partners | orderBy: ['-submitted', 'last_name', 'first_name', 'username'] | filter:query as results" ng-if="partner.role === 'user'" ng-show="radioModel === 'users'">
-			<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false" ng-class="partner.submitted ? 'box-complete' : 'box-empty'">
-				
-				<div class="text-center" ng-show="!partner.submitted">
-					<strong>{{partner.username}}</strong>
-				</div>
-				<div class="text-center crop" ng-show="partner.submitted">
-					<strong>{{partner.last_name | uppercase}}, {{partner.first_name}}</strong>
-				</div>
-
-				<p class="text-center" ng-show="!turn">{{partner.hours}} hours</p>
-
-				<div class="text-center" ng-if="turn">
-					<a href="/#!/admin/user/{{partner._id}}" class="btn btn-link agency-btn"><i class="glyphicon glyphicon-eye-open"></i></a>
-
-					<button type="button" class="btn btn-link agency-mid" ng-click="writeServiceLetter(partner._id)"><i class="glyphicon glyphicon-file"></i></button>
-
-					<button type="button" class="btn btn-link agency-btn" ng-click="deleteBox(partner)"><i class="glyphicon glyphicon-trash"></i></button>
-				</div>
-
-			</div>
-		</div>
-
-		<!-- Event View -->
-		<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="event in events | orderBy: '-date' | filter:query as results" ng-show="radioModel === 'events'">
-			<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false">
-				
-				<div class="text-center">
-					<strong>{{event.date | date: 'shortDate'}} {{event.shift ? '(' +event.shift + ')' : ''}}</strong>
-				</div>
-
-				<p class="text-center" ng-show="!turn">{{event.volunteers.length}} Volunteers</p>
-
-				<div class="text-center" ng-if="turn">
-					<a href="/#!/admin/event/{{event._id}}" class="btn btn-link agency-btn"><i class="glyphicon glyphicon-eye-open"></i></a>
-
-					<button type="button" class="btn btn-link agency-mid" ng-click="showSidebar(event)"><i class="glyphicon glyphicon-pencil"></i></button>
-
-					<button type="button" class="btn btn-link agency-btn" ng-click="deleteBox(event)"><i class="glyphicon glyphicon-trash"></i></button>
-				</div>
-
-			</div>
-		</div>
-
-		<!-- Add New User OR Event-->
-		<div class="col-xs-6 col-sm-3 hidden-print" ng-class="needToUpdate ? 'col-md-3' : ' col-md-2'">
-		  <div class="agency-box" ng-click="query.status ? updateURL(true) : showSidebar()">
-			<div class="vcenter text-center">
-				<div class="btn btn-link" ng-class="query.status ? 'badflag' : agency-btn">
-					<i class="glyphicon glyphicon-plus" ng-hide="query.status"></i>
-					<p ng-show="query.status">Clear <i class="glyphicon glyphicon-filter"></i></p>
-				</div>
-			</div>
-		  </div>
-		</div>
-
-	  </div>
-	</div>
-
-  </div>
 
 </section>

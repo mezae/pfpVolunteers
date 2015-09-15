@@ -3,11 +3,7 @@
 
 angular.module('letters').controller('EventsController', ['$scope', '$window', '$stateParams', '$location', '$filter', '$timeout', 'Authentication', 'Events', 'Agencies', 'Users', 'socket',
     function($scope, $window, $stateParams, $location, $filter, $timeout, Authentication, Events, Agencies, Users, socket) {
-        $scope.user = Authentication.user;
-
-        if (!$scope.user) $location.path('/');
-
-        $scope.adminView = $scope.user.role === 'admin';
+        if (!Authentication.user) $location.path('/');
 
         var allUsers = null;
         $scope.calculateHours = function() {
@@ -110,19 +106,6 @@ angular.module('letters').controller('EventsController', ['$scope', '$window', '
                 });
             }
         };
-
-        //Helps clean up sloppy user input
-        function cleanText(text, priority) {
-            if ((text === text.toLowerCase() || text === text.toUpperCase()) && priority === 1) {
-                return text.replace(/\w\S*/g, function(txt) {
-                    return _.capitalize(txt);
-                });
-            } else if (text === text.toUpperCase()) {
-                return text.toLowerCase();
-            } else {
-                return text;
-            }
-        }
 
         $scope.$on('$destroy', function() {
             socket.unsyncUpdates('users');

@@ -229,6 +229,10 @@ footer {
   box-shadow: none;
 }
 
+body {
+  background-color: #F3F3F3;
+}
+
 @media print {
   body {
     -webkit-print-color-adjust: exact;

@@ -2,10 +2,6 @@
 
 	<div class="col-md-12">
 
-	<h3 class="text-center" ng-hide="user.role === 'admin'">Admissions Committee Contact Form</h3>
-
-	<p class="text-center em-center col-md-9" ng-hide="user.role === 'admin'">The Student Admissions Committee assists the Admissions staff in conducting certain critical aspects of the admissions process which include Parent Meetings and First Level Testing. All members have the responsibility of completing specific assignments assigned by the Admissions staff during those allotted times. The dates for these events are on Saturdays and a few on holiday breaks. We do not ask the Admissions Committee to come in during the school week.</p>
-
 	<h3 class="text-center" ng-show="user.role === 'admin'">Contact Information</h3>
 
 	<div class="btn-group pull-right" ng-show="user.role === 'admin'">
@@ -47,108 +43,6 @@
 						<input type="gender" id="gender" name="gender" class="profile form-control" data-ng-model="currentUser.gender" placeholder="gender" required>
 
 				</div>
-
-				<div class="form-group col-md-6">
-
-					<label for="school" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">School</label>
-						<input type="text" id="school" name="school" class="profile form-control" data-ng-model="currentUser.school" placeholder="school" required>
-
-				</div>
-
-				<div class="form-group col-md-6">
-
-					<label for="grade" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Grade</label>
-						<input type="text" id="grade" name="grade" class="profile form-control" data-ng-model="currentUser.grade" placeholder="grade" required>
-
-				</div>
-
-				<div class="form-group col-md-12">
-
-					<label for="email" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Email</label>
-						<input type="email" id="email" name="email" class="profile form-control" data-ng-model="currentUser.email" placeholder="e-mail" required>
-
-				</div>
-
-				<div class="form-group col-md-12">
-
-					<label for="email2" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Email2</label>
-						<input type="email2" id="email2" name="email2" class="profile form-control" data-ng-model="currentUser.email2" placeholder="e-mail2" required>
-
-				</div>
-
-				<div class="form-group col-md-6">
-
-					<label for="tel" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Home</label>
-						<input type="tel" id="tel" name="tel" class="profile form-control" ui-mask="(999) 999-9999" data-ng-model="currentUser.phone" required>
-
-				</div>
-
-				<div class="form-group col-md-6">
-
-					<label for="tel" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Cell</label>
-						<input type="tel" id="tel" name="tel" class="profile form-control" ui-mask="(999) 999-9999" data-ng-model="currentUser.cell" required>
-
-				</div>
-
-				<div class="form-group col-md-12">
-
-					<label for="address" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Address</label>
-						<input type="text" id="address" name="address" class="profile form-control" data-ng-model="currentUser.address" placeholder="mailing address" required>
-
-				</div>
-
-				<div class="form-group col-md-6">
-
-					<label for="city" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">City</label>
-						<input type="text" id="city" name="city" class="profile form-control" data-ng-model="currentUser.city" placeholder="city" required>
-
-				</div>
-
-				<div class="form-group col-md-6">
-
-					<label for="zip" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Zip Code</label>
-						<input type="number" id="zip" name="zip" class="profile form-control" data-ng-model="currentUser.zip" placeholder="zip code" required>
-				</div>
-
-				<div class="form-group col-md-6">
-
-					<label for="emer_name" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Emergency Contact</label>
-						<input type="text" id="emer_name" name="emer_name" class="profile form-control" data-ng-model="currentUser.emergency_name" placeholder="emergency contact" required> 
-
-				</div> 
-
-				<div class="form-group col-md-6">
-
-					<label for="emer_phone" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Emergency Phone</label>
-						<input type="text" id="emer_phone" name="emer_phone" class="profile form-control" data-ng-model="currentUser.emergency_phone" placeholder="emergency phone" required> 
-
-				</div>
-
-				<div class="checkbox col-md-12">
-					I'm interested in helping in the following ways: </br>
-					<label>
-					<input type="checkbox"> Proctoring testing sessions
-					</label>
-				</div>
-
-				<div class="checkbox col-md-12">
-					<label>
-					<input type="checkbox"> Assembling Admissions materials such as mailings, school packets & parent folders
-					</label>
-				</div>
-
-				<div class="checkbox col-md-12">
-					<label>
-					<input type="checkbox"> Assistance during Parent Meetings (i.e. lights, collecting applications, speaking to parents)
-					</label>
-				</div>
-
-				<div class="form-group col-md-12">
-
-					<label for="translating" class="control-label" ng-class="{'sr-only': user.role !== 'admin'}">Translation Assistance</label>
-						<input type="text" id="translating" name="translating" class="profile form-control" data-ng-model="currentUser.translating" placeholder="translation assistance" required> 
-
-				</div> 
 
 				<div class="form-group col-md-12">
 

@@ -6,7 +6,7 @@ angular.module('letters').config(['$stateProvider',
         // Letters state routing
         $stateProvider.
         state('command', {
-            url: '/admin:status',
+            url: '/admin/volunteers',
             templateUrl: 'modules/letters/views/command.html'
         }).
         state('cc-events', {

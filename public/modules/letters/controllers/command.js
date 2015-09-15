@@ -17,14 +17,14 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
         $scope.viewUsers = function() {
             $scope.radioModel = 'users';
             $state.go('command', {}, {
-                notify: false
+                notify: true
             });
         };
 
         $scope.viewEvents = function() {
             $scope.radioModel = 'events';
             $state.go('cc-events', {}, {
-                notify: false
+                notify: true
             });
         };
 
