@@ -47,6 +47,10 @@
 				<div class="form-group">
 					<label>{{radioModel === 'users' ? 'Contact' : 'Event' }} Info</label>
 					<input type="text" class="profile form-control" ng-model="partner.username" placeholder="username" ng-show="radioModel === 'users'">
+					<input type="text" class="profile form-control" ng-model="partner.first_name" placeholder="first name" ng-show="radioModel === 'users'">
+					<input type="text" class="profile form-control" ng-model="partner.last_name" placeholder="last name" ng-show="radioModel === 'users'">
+					<input type="text" class="profile form-control" ng-model="partner.contingent" placeholder="contingent" ng-show="radioModel === 'users'">
+					<input type="text" class="profile form-control" ng-model="partner.gender" placeholder="gender (M or F)" ng-show="radioModel === 'users'">
 					<input type="text" class="profile form-control" datepicker-popup="MM/dd/yy" ng-model="event.date" is-open="opened" datepicker-options="dateOptions" show-button-bar="false" ng-click="open($event)" ng-show="radioModel === 'events'" placeholder="mm/dd/yy">
 					<input type="text" class="profile form-control" ng-model="event.shift" placeholder="event shift (optional)" ng-show="radioModel === 'events'">
 				</div>
@@ -79,13 +83,10 @@
 			<div class="row">
 
 				<!-- User View -->
-				<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="partner in partners | orderBy: ['-submitted', 'last_name', 'first_name', 'username'] | filter: query as results" ng-if="partner.role === 'user'" ng-show="radioModel === 'users'">
-					<div class="agency-box" ng-mouseenter="turn = true" ng-mouseleave="turn = false" ng-class="partner.submitted ? 'box-complete' : 'box-empty'">
+				<div class="col-xs-6 col-sm-3" ng-class="needToUpdate ? 'col-md-3' : 'col-md-2'" ng-repeat="partner in partners | orderBy: ['last_name', 'first_name', 'username'] | filter: query as results" ng-if="partner.role === 'user'" ng-show="radioModel === 'users'">
+					<div class="agency-box box-complete" ng-mouseenter="turn = true" ng-mouseleave="turn = false">
 
-						<div class="text-center" ng-show="!partner.submitted">
-							<strong>{{partner.username}}</strong>
-						</div>
-						<div class="text-center crop" ng-show="partner.submitted">
+						<div class="text-center crop">
 							<strong>{{partner.last_name | uppercase}}, {{partner.first_name}}</strong>
 						</div>
 

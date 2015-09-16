@@ -86,7 +86,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                 var headers = rows.shift();
 
                 if ($scope.radioModel === 'users') {
-                    var required_fields = ['First Name', 'Last Name', 'Gender', 'Cont.', 'Email', 'Email2', 'Emergency Contact', 'Emergency Contact Phone', 'Emergency Phone 2', 'Translating', 'Notes', 'Total hours'];
+                    var required_fields = ['First Name', 'Last Name', 'Gender', 'Cont.'];
                     var missing_fields = [];
 
                     _.forEach(required_fields, function(field) {
@@ -107,14 +107,6 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                         var lname_col = headers.indexOf('Last Name');
                         var gender_col = headers.indexOf('Gender');
                         var cont_col = headers.indexOf('Cont.');
-                        var email_col = headers.indexOf('Email');
-                        var email2_col = headers.indexOf('Email2');
-                        var emcontact_col = headers.indexOf('Emergency Contact');
-                        var emphone_col = headers.indexOf('Emergency Contact Phone');
-                        var emphone2_col = headers.indexOf('Emergency Phone 2');
-                        var trans_col = headers.indexOf('Translating');
-                        var notes_col = headers.indexOf('Notes');
-                        var hours_col = headers.indexOf('Total hours');
 
                         var allUsers = _.map($scope.partners, function(users) {
                             return (users.first_name.trim() + ' ' + users.last_name.trim()).trim();
@@ -124,19 +116,11 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                             var record = row.split(',');
                             if (!_.includes(allUsers, (record[fname_col].trim() + ' ' + record[lname_col].trim()).trim())) {
                                 var newPartner = {
-                                    username: record[email_col].trim(),
+                                    username: record[fname_col].trim().slice(1) + record[lname_col].trim() + record[cont_col],
                                     first_name: record[fname_col].trim(),
                                     last_name: record[lname_col].trim(),
                                     gender: record[gender_col],
                                     contingent: record[cont_col],
-                                    email: record[email_col].trim(),
-                                    email2: record[email2_col].trim(),
-                                    emergency_contact: record[emcontact_col].trim(),
-                                    emergency_phone: record[emphone_col].trim(),
-                                    emergency_phone2: record[emphone2_col].trim(),
-                                    translating: record[trans_col].trim(),
-                                    notes: record[notes_col].trim(),
-                                    hours: parseFloat(record[hours_col], 10),
                                     submitted: true
                                 };
                                 signup(newPartner);

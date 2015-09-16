@@ -41,68 +41,9 @@ var UserSchema = new Schema({
         type: String,
         default: '',
     },
-    school: {
-        type: String,
-        default: '',
-    },
-    grade: {
-        type: String,
-        default: '',
-    },
-    address: {
-        type: String,
-        default: '',
-    },
-    city: {
-        type: String,
-        default: '',
-    },
-    state: {
-        type: String,
-        default: '',
-    },
-    zip: {
-        type: Number,
-        default: '',
-    },
-    cell: {
-        type: String,
-        default: '',
-    },
-    phone: {
-        type: String,
-        default: '',
-    },
-    emergency_name: {
-        type: String,
-        default: '',
-    },
-    emergency_phone: {
-        type: String,
-        default: '',
-    },
-    emergency_phone2: {
-        type: String,
-        default: '',
-    },
-    email: {
-        type: String,
-        trim: true,
-        default: '',
-        match: [/.+\@.+\..+/, 'Please fill a valid email address']
-    },
-    email2: {
-        type: String,
-        trim: true,
-        default: ''
-    },
     hours: {
         type: Number,
         default: 0,
-    },
-    translating: {
-        type: String,
-        default: '',
     },
     notes: {
         type: String,
@@ -132,10 +73,6 @@ var UserSchema = new Schema({
     },
     updated: {
         type: Date
-    },
-    submitted: {
-        type: Boolean,
-        default: false
     },
     created: {
         type: Date,
