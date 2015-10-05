@@ -141,7 +141,7 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                     }
                 } else {
 
-                    var required_fields = ['First Name', 'Last Name', 'Total hours'];
+                    var required_fields = ['First Name', 'Last Name'];
                     var missing_fields = [];
 
                     _.forEach(required_fields, function(field) {
@@ -160,13 +160,12 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                         headers = headers.split(',');
                         var fname_col = headers.indexOf('First Name');
                         var lname_col = headers.indexOf('Last Name');
-                        var hours_col = headers.indexOf('Total hours');
 
                         for (var i = 0; i < rows.length; i++) {
                             rows[i] = rows[i].split(',');
                         }
 
-                        var first_event = hours_col + 1;
+                        var first_event = lname_col + 1;
                         var last_event = headers.length - 1;
                         for (var e = first_event; e <= last_event; e++) {
                             $scope.event = {
