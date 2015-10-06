@@ -175,10 +175,21 @@ angular.module('letters').controller('CommandCenterController', ['$scope', '$win
                             for (var user = 0; user < rows.length; user++) {
                                 var yourHours = parseFloat(rows[user][e], 10);
                                 if (yourHours > 0) {
-                                    $scope.event.volunteers.push({
+                                    var volunteer = {
                                         name: (rows[user][fname_col].trim() + ' ' + rows[user][lname_col].trim()).trim(),
                                         hours: yourHours
-                                    });
+                                    }
+
+                                    var newVol = _.filter($scope.partners, function(user) {
+                                        return user.first_name + ' ' + user.last_name === volunteer.name;
+                                    })[0];
+
+                                    if (newVol) {
+                                        $scope.event.volunteers.push(volunteer);
+                                        newVol.hours += volunteer.hours;
+                                        Agencies.update(newVol);
+                                    }
+                                    
                                 }
                             }
                             $scope.save();
